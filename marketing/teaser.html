@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<title>JP Turtle Teaser</title>
+<style>
+html,body{margin:0;background:#000}
+#stage{width:540px;height:960px;position:relative;overflow:hidden;
+  font-family:"DejaVu Sans","Liberation Sans","IPAGothic",sans-serif;color:#5a3d2b}
+svg{position:absolute;left:0;top:0}
+.t{position:absolute;left:24px;right:24px;text-align:center;font-weight:800;line-height:1.25;
+  text-shadow:0 3px 0 #fff,0 0 18px rgba(255,255,255,.9);display:none}
+#cap{top:46px;font-size:29px}
+#cap2{top:700px;font-size:26px}
+#tag{position:absolute;left:0;right:0;bottom:16px;text-align:center;font-size:12px;opacity:.55;display:none}
+#bubble{position:absolute;left:60px;right:60px;top:290px;background:#fff;border-radius:30px;
+  padding:20px 22px;text-align:center;font-size:25px;font-weight:800;line-height:1.3;
+  box-shadow:0 8px 0 #f3d9c9;display:none}
+#bubble:after{content:"";position:absolute;left:50%;bottom:-22px;margin-left:-16px;
+  border:16px solid transparent;border-top:24px solid #fff;border-bottom:0}
+</style></head><body>
+<div id="stage">
+  <svg id="svg" width="540" height="960" viewBox="0 0 540 960"></svg>
+  <div id="cap" class="t"></div>
+  <div id="cap2" class="t"></div>
+  <div id="bubble"></div>
+  <div id="tag">Konzept-Animation – kein echtes App-Material</div>
+</div>
+<script>
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const ease=x=>{x=clamp(x);return x*x*(3-2*x)};
+const backOut=x=>{x=clamp(x);const c=1.9;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+const lerp=(a,b,x)=>a+(b-a)*x;
+function rnd(i){const s=Math.sin(i*127.1+311.7)*43758.5453;return s-Math.floor(s)}
+function kf(t,keys){ // keys: [t,v,...] ease between
+  if(t<=keys[0][0])return keys[0].slice(1);
+  for(let i=0;i<keys.length-1;i++){const a=keys[i],b=keys[i+1];
+    if(t<=b[0]){const x=ease((t-a[0])/(b[0]-a[0]));return a.slice(1).map((v,j)=>lerp(v,b[j+1],x))}}
+  return keys[keys.length-1].slice(1);
+}
+// ---------- Hintergrund ----------
+function bg(t){
+  let s=`<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF3E2"/><stop offset="1" stop-color="#FFD9E4"/></linearGradient></defs>
+  <rect width="540" height="960" fill="url(#g)"/>`;
+  // Seigaiha-artige Wellenkreise
+  for(let r=0;r<9;r++)for(let c=0;c<7;c++){
+    const x=c*90+(r%2?45:0), y=520+r*50;
+    s+=`<circle cx="${x}" cy="${y}" r="46" fill="none" stroke="#ffffff" stroke-opacity=".35" stroke-width="3"/>`;
+  }
+  // Sakura-Blüten
+  for(let i=0;i<14;i++){
+    const sp=22+rnd(i)*26, x=(rnd(i+9)*620+t*sp*0.5)%620-40, y=((rnd(i+3)*1100+t*sp)%1100)-70;
+    const rot=t*60*(rnd(i+5)-.5)+rnd(i)*360, sc=.6+rnd(i+7)*.7;
+    s+=`<g transform="translate(${x},${y}) rotate(${rot}) scale(${sc})" opacity=".8">
+      <ellipse cx="0" cy="-7" rx="6" ry="10" fill="#FFB7CC"/><ellipse cx="0" cy="-7" rx="6" ry="10" fill="#FFB7CC" transform="rotate(72)"/>
+      <ellipse cx="0" cy="-7" rx="6" ry="10" fill="#FFB7CC" transform="rotate(144)"/><ellipse cx="0" cy="-7" rx="6" ry="10" fill="#FFB7CC" transform="rotate(216)"/>
+      <ellipse cx="0" cy="-7" rx="6" ry="10" fill="#FFB7CC" transform="rotate(288)"/><circle r="3" fill="#FF8FB0"/></g>`;
+  }
+  return s;
+}
+// ---------- Konfetti ----------
+function confetti(t,t0,ox,oy,n,spread=1){
+  const dt=t-t0; if(dt<0||dt>2.2)return"";
+  const cols=["#FF8FB0","#FFD36B","#7BC47F","#8AC8F5","#C79BF2"];
+  let s="";
+  for(let i=0;i<n;i++){
+    const a=-Math.PI/2+(rnd(i+t0*7)-.5)*2.6*spread, v=180+rnd(i+30)*330;
+    const x=ox+Math.cos(a)*v*dt, y=oy+Math.sin(a)*v*dt+420*dt*dt;
+    const op=clamp((2.2-dt)/0.7);
+    s+=`<rect x="-5" y="-3" width="10" height="6" rx="2" fill="${cols[i%5]}" opacity="${op}" transform="translate(${x},${y}) rotate(${dt*400*(rnd(i)-.5)+rnd(i+2)*360})"/>`;
+  }
+  return s;
+}
+// ---------- Ei ----------
+function egg(x,y,sc,t){
+  let rot=0;
+  [[0.35],[0.85],[1.3],[1.6],[1.8]].forEach(([w],i)=>{const d=t-w;if(d>0&&d<.35)rot+=Math.sin(d*38)*(4+i*1.5)*(1-d/.35)});
+  const crack=clamp((t-1.2)/0.25), crack2=clamp((t-1.65)/0.2);
+  const breathe=1+Math.sin(t*5)*.012;
+  return `<g transform="translate(${x},${y}) rotate(${rot}) scale(${sc*breathe})">
+    <ellipse cx="0" cy="118" rx="82" ry="13" fill="#000" opacity=".08"/>
+    <path d="M0,-112 C72,-112 96,-30 96,26 C96,86 56,116 0,116 C-56,116 -96,86 -96,26 C-96,-30 -72,-112 0,-112Z" fill="#FFF8EC" stroke="#E6D3B0" stroke-width="5"/>
+    <circle cx="-48" cy="30" r="14" fill="#BFE3B4"/><circle cx="52" cy="62" r="11" fill="#BFE3B4"/><circle cx="26" cy="-34" r="9" fill="#BFE3B4"/><circle cx="-34" cy="-52" r="7" fill="#BFE3B4"/>
+    <path d="M-18,22 q8,8 16,0 M18,22 q8,8 16,0" stroke="#5a3d2b" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <ellipse cx="-34" cy="42" rx="12" ry="7" fill="#FFB7CC" opacity=".8"/><ellipse cx="52" cy="42" rx="12" ry="7" fill="#FFB7CC" opacity=".8"/>
+    <path d="M-12,48 q12,10 24,0" stroke="#5a3d2b" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M-30,-60 l14,18 l-12,10 l16,16" stroke="#8a6a4a" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="${crack}"/>
+    <path d="M40,-30 l-14,14 l12,10" stroke="#8a6a4a" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="${crack2}"/>
+  </g>`;
+}
+// ---------- Kame ----------
+function kame(x,y,sc,t,o={}){
+  const bob=Math.sin(t*4.2)*3*sc, bl=((t%2.6)>2.45)?0.1:1;
+  const happy=o.happy||0, wave=o.wave||0;
+  const shellHat=o.shell?`<path d="M-58,-14 L-42,-38 L-28,-16 L-14,-42 L0,-18 L14,-42 L28,-16 L42,-38 L58,-14 Q62,-74 0,-86 Q-62,-74 -58,-14Z" fill="#FFF8EC" stroke="#E6D3B0" stroke-width="4"/>`:"";
+  const armR=wave?`rotate(${-35+Math.sin(t*14)*22} 80 22)`:"";
+  const eyes=happy?`<path d="M-26,-22 q8,-9 16,0 M10,-22 q8,-9 16,0" stroke="#3b2a20" stroke-width="5" fill="none" stroke-linecap="round"/>`
+    :`<g transform="scale(1,${bl})"><ellipse cx="-18" cy="-22" rx="7" ry="9" fill="#3b2a20"/><ellipse cx="18" cy="-22" rx="7" ry="9" fill="#3b2a20"/><circle cx="-16" cy="-26" r="2.6" fill="#fff"/><circle cx="20" cy="-26" r="2.6" fill="#fff"/></g>`;
+  return `<g transform="translate(${x},${y+bob}) scale(${sc})">
+    <ellipse cx="0" cy="104" rx="88" ry="13" fill="#000" opacity=".08"/>
+    <ellipse cx="-50" cy="90" rx="26" ry="16" fill="#98C98B"/><ellipse cx="50" cy="90" rx="26" ry="16" fill="#98C98B"/>
+    <ellipse cx="0" cy="40" rx="100" ry="66" fill="#6DB36F" stroke="#4E9457" stroke-width="5"/>
+    <path d="M-40,20 l20,-14 l24,0 l20,14 l-20,16 l-24,0z" fill="#8FD08F" opacity=".9"/>
+    <circle cx="-66" cy="52" r="15" fill="#8FD08F"/><circle cx="66" cy="52" r="15" fill="#8FD08F"/><circle cx="0" cy="70" r="14" fill="#8FD08F"/>
+    <ellipse cx="-86" cy="34" rx="18" ry="13" fill="#A9DBA0" transform="rotate(-25 -86 34)"/>
+    <ellipse cx="86" cy="34" rx="18" ry="13" fill="#A9DBA0" transform="${armR||'rotate(25 86 34)'}"/>
+    <circle cx="0" cy="-14" r="54" fill="#A9DBA0" stroke="#86C07C" stroke-width="4"/>
+    ${eyes}
+    <ellipse cx="-36" cy="-2" rx="11" ry="7" fill="#FFB7CC" opacity=".85"/><ellipse cx="36" cy="-2" rx="11" ry="7" fill="#FFB7CC" opacity=".85"/>
+    <path d="M-10,2 q10,${happy?16:10} 20,0" stroke="#3b2a20" stroke-width="4" fill="${happy?'#fff':'none'}" stroke-linecap="round"/>
+    ${shellHat}
+  </g>`;
+}
+// ---------- Schreib-Dojo ----------
+const strokeD="M 90 20 C 90 120 92 190 105 225 C 125 262 190 262 225 200";
+const probe=document.createElementNS("http://www.w3.org/2000/svg","path");probe.setAttribute("d",strokeD);
+const plen=probe.getTotalLength();
+function dojo(t){
+  const pop=backOut((t-5.0)/0.4), sc=pop;
+  const p=ease((t-5.5)/1.3);
+  const pt=probe.getPointAtLength(plen*p);
+  const score=Math.round(92*ease((t-6.8)/0.6)), bp=ease((t-6.7)/0.5);
+  const bars=[["Form",94],["Präzision",90],["Lage",92]].map(([l,v],i)=>{
+    const w=170*(v/100)*ease((t-6.7-i*.15)/0.5);
+    return `<text x="100" y="${572+i*40}" font-size="15" font-weight="700" fill="#5a3d2b">${l}</text>
+      <rect x="200" y="${560+i*40}" width="170" height="14" rx="7" fill="#F1E6DA"/><rect x="200" y="${560+i*40}" width="${w}" height="14" rx="7" fill="#7BC47F"/>`}).join("");
+  const bpop=backOut((t-6.8)/0.35);
+  return `<g transform="translate(270,430) scale(${sc}) translate(-270,-430)" opacity="${clamp((t-5.0)/0.15)}">
+    <rect x="70" y="170" width="400" height="520" rx="38" fill="#fff" stroke="#F3D9C9" stroke-width="5"/>
+    <rect x="100" y="190" width="150" height="32" rx="16" fill="#FFE4EC"/><text x="175" y="212" font-size="15" font-weight="800" text-anchor="middle" fill="#C94F78">Nachspuren</text>
+    <g transform="translate(120,225)">
+      <rect x="-10" y="-5" width="300" height="300" rx="20" fill="#FFFBF5" stroke="#EFE3D6" stroke-width="3"/>
+      <path d="M140 -5 V295 M-10 145 H290" stroke="#EFE3D6" stroke-width="2" stroke-dasharray="8 8"/>
+      <path d="${strokeD}" fill="none" stroke="#E4DDD3" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="${strokeD}" fill="none" stroke="#F07A9B" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="${100-100*p}"/>
+      ${(p>0&&p<1)?`<circle cx="${pt.x}" cy="${pt.y}" r="24" fill="#5a3d2b" opacity=".18"/><circle cx="${pt.x}" cy="${pt.y}" r="9" fill="#fff" opacity=".9"/>`:""}
+    </g>${bars}
+    <g transform="translate(405,235) scale(${bpop})" opacity="${bp}">
+      <circle r="48" fill="#7BC47F" stroke="#fff" stroke-width="5"/>
+      <text y="9" font-size="36" font-weight="900" text-anchor="middle" fill="#fff">${score}</text>
+      <text y="30" font-size="12" font-weight="800" text-anchor="middle" fill="#fff">Punkte</text>
+    </g>
+  </g>`;
+}
+// ---------- Nur 3 Karten ----------
+function cards(t){
+  const kana=["あ","い","う"];
+  let s="";
+  for(let i=0;i<3;i++){
+    const t0=8.0+i*0.12, pop=backOut((t-t0)/0.35);
+    const cx=135+i*135, cy=380;
+    const chk=backOut((t-(8.55+i*0.45))/0.3);
+    s+=`<g transform="translate(${cx},${cy}) scale(${pop})" opacity="${clamp((t-t0)/0.1)}">
+      <rect x="-56" y="-85" width="112" height="170" rx="24" fill="#fff" stroke="#F3D9C9" stroke-width="5"/>
+      <text y="22" font-size="64" font-weight="800" text-anchor="middle" fill="#5a3d2b">${kana[i]}</text>
+      <g transform="translate(34,-68) scale(${chk})"><circle r="22" fill="#7BC47F" stroke="#fff" stroke-width="4"/>
+      <path d="M-9,1 l7,8 l13,-16" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g></g>`;
+  }
+  const b=backOut((t-9.45)/0.35);
+  s+=`<g transform="translate(270,560) scale(${b})"><rect x="-130" y="-30" width="260" height="60" rx="30" fill="#7BC47F"/>
+     <text y="9" font-size="24" font-weight="800" text-anchor="middle" fill="#fff">Tag geschafft ✓</text></g>`;
+  return s;
+}
+// ---------- Sperrbildschirm-Widget ----------
+function lockscreen(t){
+  const pop=backOut((t-10.0)/0.4);
+  const rev=clamp((t-10.95)/0.2), ok=clamp((t-11.55)/0.2);
+  // Finger-Tap
+  let fx=300,fy=640,fo=0;
+  if(t>10.45&&t<11.1){const x=ease((t-10.45)/0.4);fx=lerp(330,270,x);fy=lerp(620,458,x);fo=1}
+  if(t>11.2&&t<11.8){const x=ease((t-11.2)/0.3);fx=lerp(270,325,x);fy=lerp(458,458,x);fo=1}
+  const press=(t>10.85&&t<11.0)||(t>11.5&&t<11.65)?0.8:1;
+  const flash=ok>0?`<rect x="150" y="300" width="240" height="190" rx="28" fill="#7BC47F" opacity="${.5*(1-clamp((t-11.55)/0.35))}"/>`:"";
+  return `<g transform="translate(270,445) scale(${pop}) translate(-270,-445)" opacity="${clamp((t-10.0)/0.15)}">
+    <defs><linearGradient id="ph" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4d86"/><stop offset="1" stop-color="#9a86c4"/></linearGradient></defs>
+    <rect x="120" y="150" width="300" height="590" rx="48" fill="url(#ph)" stroke="#2f2f55" stroke-width="8"/>
+    <rect x="236" y="164" width="68" height="20" rx="10" fill="#1d1d3a"/>
+    <text x="270" y="262" font-size="62" font-weight="300" text-anchor="middle" fill="#fff">9:41</text>
+    <rect x="150" y="300" width="240" height="190" rx="28" fill="#fff" fill-opacity=".22" stroke="#fff" stroke-opacity=".4" stroke-width="2"/>
+    ${flash}
+    <text x="172" y="370" font-size="60" font-weight="800" fill="#fff">猫</text>
+    <text x="252" y="342" font-size="20" font-weight="800" fill="#fff">ねこ</text>
+    <text x="252" y="368" font-size="16" fill="#fff" opacity=".85">neko</text>
+    <text x="172" y="410" font-size="22" font-weight="800" fill="#FFE9A8" opacity="${rev}">Katze</text>
+    <g opacity="${1-rev}"><rect x="170" y="428" width="200" height="38" rx="19" fill="#fff" fill-opacity=".38"/>
+      <text x="270" y="453" font-size="15" font-weight="800" text-anchor="middle" fill="#fff">Bedeutung aufdecken</text></g>
+    <g opacity="${rev}"><rect x="168" y="428" width="96" height="38" rx="19" fill="#FF8FB0"/><text x="216" y="453" font-size="15" font-weight="800" text-anchor="middle" fill="#fff">Nochmal</text>
+      <rect x="276" y="428" width="96" height="38" rx="19" fill="#7BC47F"/><text x="324" y="453" font-size="15" font-weight="800" text-anchor="middle" fill="#fff">Gewusst</text></g>
+    <g opacity="${fo}"><circle cx="${fx}" cy="${fy}" r="${24*press}" fill="#fff" fill-opacity=".55" stroke="#fff" stroke-width="3"/></g>
+  </g>`;
+}
+// ---------- Untertitel / Szenen ----------
+const CAPS=[
+ {id:"cap",t0:0.0,t1:2.0,h:"Dieses Ei schlüpft nur,<br>wenn du <span style='color:#E5557F'>Japanisch</span> lernst 🥚",y:70},
+ {id:"cap",t0:5.0,t1:8.0,h:"Mit dem Finger schreiben:<br>Form · Präzision · Lage"},
+ {id:"cap",t0:8.0,t1:10.0,h:"Null Lust? <span style='color:#E5557F'>Nur 3 Karten.</span><br>Der Tag zählt trotzdem."},
+ {id:"cap",t0:10.0,t1:12.0,h:"Vokabeln direkt auf dem<br>Sperrbildschirm"},
+ {id:"cap",t0:12.0,t1:13.5,h:"Mit jeder Runde<br>wächst Kame 🐣"},
+ {id:"cap",t0:13.5,t1:15.1,h:"In Arbeit · <span style='color:#E5557F'>geplant für<br>den 1. November</span>"},
+ {id:"cap2",t0:13.8,t1:15.1,h:"Folge mir, wenn Kame<br>schlüpfen soll 🐢<div style='font-size:15px;font-weight:700;margin-top:8px;opacity:.7'>JP Turtle · iPhone-App</div>"},
+];
+function applyCaps(t){
+  const used={};
+  CAPS.forEach(c=>{
+    if(t>=c.t0&&t<c.t1){
+      const el=document.getElementById(c.id); used[c.id]=1;
+      const p=backOut((t-c.t0)/0.35), o=clamp((t-c.t0)/0.12)*clamp((c.t1-t)/0.12);
+      if(el.dataset.h!==c.h){el.innerHTML=c.h;el.dataset.h=c.h}
+      el.style.display="block";el.style.opacity=o;el.style.transform=`scale(${.8+.2*p})`;
+    }});
+  ["cap","cap2"].forEach(id=>{if(!used[id])document.getElementById(id).style.display="none"});
+  // Sprechblase
+  const b=document.getElementById("bubble");
+  if(t>=2.35&&t<5.0){
+    const p=backOut((t-2.35)/0.35);
+    if(!b.innerHTML)b.innerHTML="Hi, ich bin <span style='color:#2f8f4a'>Kame</span>! 🐢<br>Fehler sind mein Futter!";
+    b.style.display="block";b.style.transform=`scale(${p})`;b.style.opacity=clamp((5.0-t)/0.15);
+  }else b.style.display="none";
+  document.getElementById("tag").style.display=(t>=5.0&&t<12.0)?"block":"none";
+}
+// ---------- Frame ----------
+function render(t){
+  let s=bg(t);
+  if(t<2.0){
+    s+=egg(270,540,1.55,t);
+  }else{
+    // Kame-Position/Größe
+    const [ky,ks]=kf(t,[[2.0,600,1.5],[4.9,600,1.5],[5.4,868,.6],[11.95,868,.6],[12.0,560,.6],[12.5,560,1.8],[13.4,545,1.75],[13.6,470,1.5],[15,470,1.5]]);
+    const born=backOut((t-2.0)/0.4);
+    const hat=t<12.0;
+    const happy=(t>=6.9&&t<7.9)||(t>=12.0&&t<13.5)?1:0;
+    s+=`<g opacity="${clamp((t-2.0)/0.1)}">`+kame(270,ky,ks*(.6+.4*born),t,{shell:hat,happy,wave:t>=13.5?1:0})+`</g>`;
+    // Eierschalen-Splitter beim Schlüpfen
+    if(t<2.8){const d=t-2.0;for(let i=0;i<7;i++){const a=-Math.PI/2+(rnd(i)-.5)*2.4,v=160+rnd(i+4)*180;
+      s+=`<path d="M0,0 l14,-8 l8,14 z" fill="#FFF8EC" stroke="#E6D3B0" stroke-width="2" opacity="${1-d/0.8}" transform="translate(${270+Math.cos(a)*v*d},${600-40+Math.sin(a)*v*d+500*d*d}) rotate(${d*500*(rnd(i)-.5)})"/>`}}
+  }
+  if(t>=5.0&&t<8.0)s+=dojo(t);
+  if(t>=8.0&&t<10.1)s+=cards(t);
+  if(t>=10.0&&t<12.0)s+=lockscreen(t);
+  s+=confetti(t,2.0,270,560,26,1.1)+confetti(t,7.0,405,235,18,1.4)+confetti(t,9.45,270,560,22,1.5)+confetti(t,12.0,270,560,60,1.6)+confetti(t,13.5,270,470,28,1.5);
+  document.getElementById("svg").innerHTML=s;
+  applyCaps(t);
+}
+render(0);
+</script></body></html>
