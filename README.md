@@ -39,6 +39,26 @@ gemeistert hast, bekommt der Panzer ein neues Muster.
   Fortschrittsraster für alle 46 Grundzeichen pro Schrift.
 - **Wörterbuch** mit Suche, Kategorie-Filter und Lernstatus pro Wort.
 
+### Kames Welt (das Herzstück)
+Gelernte Wörter ziehen als **Items** in Kames Welt ein, und die Welt füllt sich Gebiet für Gebiet:
+
+- **Freischalten:** Ein Wort wird zum Item, sobald du es **5-mal richtig** beantwortet hast.
+  Gutes Schreiben eines Kanji (ab Note 65) zählt für sein Wort **doppelt** und gibt dem
+  Item zusätzlich einen **Tusche-Stempel**.
+- **11 Gebiete**, jedes mit Themenwörtern: Teich (Fisch, Welle, Wasser, Frosch, Koi ...),
+  Teehaus (Reis, Tee ...), Torii-Tor (Begrüßungen), Garten, Dorf, Berg, Marktplatz,
+  Kramladen, Sonnenuhr, Pfad der Tat (Verben) und Laternen-Allee (Adjektive). Jedes der
+  rund 210 Wörter gehört genau zu einem Gebiet.
+- **Nebel:** Neue Gebiete liegen zuerst im Nebel und lichten sich, wenn genug Items
+  freigeschaltet sind. Neue Wörter werden nur aus offenen Gebieten eingeführt. So bekommt
+  man einen roten Faden statt einer Wortlawine.
+- **Gebiet vollständig:** einmalig 50 XP, 3 Herzen und ein Achievement. Die ganze Welt
+  vollständig ist das größte Achievement der App.
+- **„Hier lernen“** startet eine Sitzung nur mit den Wörtern des Gebiets. Frühes Üben
+  zählt fürs Freischalten, verschiebt aber den Wiederholungstermin nicht, damit die
+  Spaced Repetition ehrlich bleibt.
+- Die Items zeigen in der App ein SF-Symbol (Fisch, Tasse, Berg ...), je Gebiet eine eigene Farbe.
+
 ### Gamification (für schlechte Lerner gebaut)
 - **„Nur 3 Karten“**: Eine Minute reicht, damit der Tag zählt.
 - **Tagesquests**, die klein anfangen („Aufwärmen: 3 Karten“).
@@ -95,6 +115,7 @@ Sources/JPTurtleCore/              Foundation-only Kern – läuft auch unter Li
   Ink.swift                        Bewertung von Handschrift (BitMask + InkScorer)
   StudyEngine.swift                Einzige Schreib-API auf den Speicher (App + Widget)
   WidgetQuiz.swift                 Zustand und Regeln des Widget-Quiz
+  World.swift                      Kames Welt: Gebiete, Items, Freischalt-Regeln
   SharedStore.swift                UserDefaults, App Group wenn verfügbar
 Sources/JPTurtle/                  SwiftUI-App (iOS 17+)
 Sources/JPTurtleWidget/            WidgetKit-Extension + App Intents
@@ -210,7 +231,8 @@ und `SharedStore.appGroupID` müssen zusammenpassen (`group.<bundleID>`).
 
 ## Weiterentwickeln
 
-- **Neue Wörter**: in `Vocabulary.swift` eine `add(...)`-Zeile ergänzen. IDs
+- **Neue Wörter**: in `Vocabulary.swift` eine `add(...)`-Zeile ergänzen. Das Wort landet automatisch
+  im Gebiet seiner Kategorie (oder in der Liste `explicit` in `World.swift`). IDs
   werden fortlaufend vergeben – neue Wörter deshalb **ans Ende** einer
   Kategorie oder ans Ende der Liste setzen, sonst verschieben sich IDs und
   gespeicherte Karten zeigen auf andere Wörter. Bei Kanji die Strichzahl in
