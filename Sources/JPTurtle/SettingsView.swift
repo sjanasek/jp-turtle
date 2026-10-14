@@ -1,0 +1,74 @@
+#if os(iOS)
+import SwiftUI
+import JPTurtleCore
+
+struct SettingsView: View {
+    @EnvironmentObject private var model: AppModel
+    @State private var confirmReset = false
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    NavigationLink {
+                        DictionaryView()
+                    } label: {
+                        Label("Wörterbuch (\(Vocabulary.all.count) Wörter)", systemImage: "book")
+                    }
+                }
+
+                Section("Lernen") {
+                    Stepper(value: Binding(
+                        get: { model.progress.dailyGoal },
+                        set: { model.setDailyGoal($0) }
+                    ), in: 5...50, step: 5) {
+                        HStack {
+                            Text("Tagesziel")
+                            Spacer()
+                            Text("\(model.progress.dailyGoal) Karten").foregroundStyle(.secondary)
+                        }
+                    }
+                }
+
+                Section {
+                    LabeledContent("Daten mit Widget geteilt") {
+                        Image(systemName: model.store.isSharedWithWidget ? "checkmark.circle.fill" : "xmark.circle")
+                            .foregroundStyle(model.store.isSharedWithWidget ? Theme.accent : Theme.sun)
+                    }
+                    LabeledContent("App Group", value: SharedStore.appGroupID)
+                        .font(.footnote)
+                    Button("Widgets jetzt aktualisieren") { model.refreshWidgets() }
+                } header: {
+                    Text("Widgets")
+                } footer: {
+                    Text(model.store.isSharedWithWidget
+                         ? "App und Widgets teilen sich denselben Fortschritt."
+                         : "Die App Group ist nicht aktiv (Entitlement fehlt). Widgets laufen trotzdem, zählen aber getrennt. Mit bezahltem Developer-Account: in xtool.yml `entitlementsPath` einkommentieren.")
+                }
+
+                Section("Daten") {
+                    Button("Von vorn beginnen", role: .destructive) { confirmReset = true }
+                }
+
+                Section("Über") {
+                    LabeledContent("Streak-Schilde", value: "\(model.progress.shields) / 3")
+                    Text("Ein Schild fängt automatisch einen verpassten Tag ab. Alle 5 Serientage gibt es einen neuen, außerdem manchmal aus der Tageskiste.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    LabeledContent("Version", value: "0.1.0")
+                    Text("JP Turtle ist ein Open-Source-Lernspiel. Gebaut mit SwiftUI, WidgetKit und xtool – ganz ohne Xcode-Projekt.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .navigationTitle("Mehr")
+            .confirmationDialog("Wirklich alles löschen?", isPresented: $confirmReset, titleVisibility: .visible) {
+                Button("Fortschritt löschen", role: .destructive) { model.resetEverything() }
+                Button("Abbrechen", role: .cancel) {}
+            } message: {
+                Text("XP, Serie, Karten und Kana-Fortschritt werden zurückgesetzt. Kame wird wieder zum Ei.")
+            }
+        }
+    }
+}
+#endif

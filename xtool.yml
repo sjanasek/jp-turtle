@@ -1,0 +1,31 @@
+# xtool-Projektbeschreibung (Schema-Version 1).
+# Doku: https://xtool.sh  ·  Schema: Sources/PackLib/PackSchema.swift im xtool-Repo
+version: 1
+
+# Bundle-ID der App. Bei einer kostenlosen Apple-ID registriert xtool diese ID
+# automatisch für dein Team – trotzdem solltest du sie auf etwas Eigenes ändern,
+# damit sie nicht mit anderen Leuten kollidiert.
+bundleID: com.sjanasek.jpturtle
+
+# Welches Library-Produkt aus Package.swift ist die App?
+product: JPTurtle
+
+# Zusätzliche Info.plist-Keys (Anzeigename, URL-Scheme für Deep Links aus Widgets, ...).
+infoPath: Support/JPTurtle-Info.plist
+
+# App-Icon (muss PNG sein).
+iconPath: Support/AppIcon.png
+
+# Entitlements. Für die Datenfreigabe zwischen App und Widget wird eine
+# App Group benötigt. Stand Oktober 2026 unterstützt xtool App Groups nur mit
+# bezahltem Developer-Account; die Freischaltung für kostenlose Apple-IDs ist
+# als PR #284 (https://github.com/xtool-org/xtool/pull/284) in Arbeit.
+# Mit bezahltem Account (oder sobald der PR gemerged ist) die Zeile einkommentieren:
+# entitlementsPath: Support/JPTurtle.entitlements
+
+extensions:
+  - product: JPTurtleWidget
+    infoPath: Support/JPTurtleWidget-Info.plist
+    # Die Bundle-ID der Extension wird automatisch zu
+    # <bundleID>.JPTurtleWidget – kann hier aber überschrieben werden:
+    # bundleID: com.sjanasek.jpturtle.widget
