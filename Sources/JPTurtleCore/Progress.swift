@@ -115,6 +115,10 @@ public struct Progress: Codable, Equatable, Sendable {
     /// Anzahl Tage, die vor dem letzten Lernen pausiert wurden (für Hanas Begrüßung).
     public var lastGapDays: Int = 0
 
+    // Einstellungen
+    public var romajiMode: RomajiMode = .fading
+    public var autoSpeak: Bool = true
+
     // Schreiben
     public var totalWritings: Int = 0
     public var perfectWritings: Int = 0
@@ -155,6 +159,8 @@ public struct Progress: Codable, Equatable, Sendable {
         chestOpenedDay = try c.decodeIfPresent(String.self, forKey: .chestOpenedDay)
         comebackBonusRemaining = get(.comebackBonusRemaining, 0)
         lastGapDays = get(.lastGapDays, 0)
+        romajiMode = get(.romajiMode, .fading)
+        autoSpeak = get(.autoSpeak, true)
         totalWritings = get(.totalWritings, 0)
         perfectWritings = get(.perfectWritings, 0)
         writingBest = get(.writingBest, [:])

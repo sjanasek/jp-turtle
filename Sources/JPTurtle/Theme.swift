@@ -186,14 +186,22 @@ struct ChoiceButton: View {
 
     let text: String
     let state: Status
+    var caption: String? = nil
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             HStack {
-                Text(text)
-                    .font(.body.weight(.medium))
-                    .multilineTextAlignment(.leading)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(text)
+                        .font(.body.weight(.medium))
+                        .multilineTextAlignment(.leading)
+                    if let caption {
+                        Text(caption)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
                 Spacer()
                 if state == .correct { Image(systemName: "checkmark.circle.fill") }
                 if state == .wrong { Image(systemName: "xmark.circle.fill") }
@@ -225,4 +233,24 @@ struct ChoiceButton: View {
         }
     }
 }
+/// Lautsprecher-Knopf: spricht den Text mit der japanischen Systemstimme.
+struct SpeakButton: View {
+    let text: String
+    var size: CGFloat = 44
+
+    var body: some View {
+        Button {
+            SpeechService.shared.speak(text)
+        } label: {
+            Image(systemName: "speaker.wave.2.fill")
+                .font(.system(size: size * 0.45))
+                .foregroundStyle(Theme.accent)
+                .frame(width: size, height: size)
+                .background(Theme.accent.opacity(0.12), in: Circle())
+        }
+        .buttonStyle(.borderless)
+        .accessibilityLabel("Aussprache anhören")
+    }
+}
+
 #endif

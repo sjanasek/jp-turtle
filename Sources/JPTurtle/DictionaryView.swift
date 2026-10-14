@@ -63,6 +63,7 @@ struct WordRow: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
+            SpeakButton(text: SpokenText.text(for: word), size: 32)
             statusBadge
         }
         .padding(.vertical, 2)

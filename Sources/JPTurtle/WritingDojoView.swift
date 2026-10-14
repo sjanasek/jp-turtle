@@ -194,6 +194,7 @@ struct WritingSessionView: View {
             VStack(spacing: 2) {
                 HStack(spacing: 8) {
                     Text(target.reading).font(.title2.bold())
+                    SpeakButton(text: SpokenText.text(for: target), size: 34)
                     if let s = target.strokes {
                         Text("· \(s) Strich\(s == 1 ? "" : "e")").font(.subheadline).foregroundStyle(.secondary)
                     }
@@ -307,6 +308,9 @@ struct WritingSessionView: View {
         score = s
         showTemplate = true
         let outcome = model.recordWriting(target: target, score: s, traced: traced)
+        if model.progress.autoSpeak {
+            SpeechService.shared.speak(SpokenText.text(for: target))
+        }
         sessionXP += outcome.xpGained
         if s.isPerfect { perfects += 1 }
 

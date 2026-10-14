@@ -17,6 +17,28 @@ struct SettingsView: View {
                     }
                 }
 
+                Section {
+                    Picker("Lautschrift (Romaji)", selection: Binding(
+                        get: { model.progress.romajiMode },
+                        set: { model.setRomajiMode($0) }
+                    )) {
+                        ForEach(RomajiMode.allCases, id: \.self) { Text($0.title).tag($0) }
+                    }
+                    Toggle("Aussprache automatisch abspielen", isOn: Binding(
+                        get: { model.progress.autoSpeak },
+                        set: { model.setAutoSpeak($0) }
+                    ))
+                    Button("Aussprache testen") {
+                        SpeechService.shared.speak("こんにちは")
+                    }
+                } header: {
+                    Text("Aussprache & Hilfen")
+                } footer: {
+                    Text(SpeechService.shared.hasJapaneseVoice
+                         ? "Für eine natürlichere Stimme: Einstellungen → Bedienungshilfen → Gesprochene Inhalte → Stimmen → Japanisch."
+                         : "Auf diesem iPhone ist keine japanische Stimme installiert. Lade eine unter Einstellungen → Bedienungshilfen → Gesprochene Inhalte → Stimmen → Japanisch.")
+                }
+
                 Section("Lernen") {
                     Stepper(value: Binding(
                         get: { model.progress.dailyGoal },

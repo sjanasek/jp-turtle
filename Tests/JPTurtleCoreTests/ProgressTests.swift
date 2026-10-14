@@ -90,3 +90,31 @@ final class ProgressTests: XCTestCase {
         XCTAssertEqual(FriendshipLevel.level(forHearts: 200), .soulmate)
     }
 }
+
+final class PronunciationTests: XCTestCase {
+    func testRomajiFadesOnlyWhenMastered() {
+        var card = CardState(wordID: "w0001")
+        XCTAssertTrue(RomajiMode.fading.shouldShow(for: nil))
+        XCTAssertTrue(RomajiMode.fading.shouldShow(for: card))
+        for _ in 0..<5 { card = Scheduler.review(card, grade: .good) }
+        XCTAssertTrue(card.isMastered)
+        XCTAssertFalse(RomajiMode.fading.shouldShow(for: card))
+        XCTAssertTrue(RomajiMode.always.shouldShow(for: card))
+        XCTAssertFalse(RomajiMode.off.shouldShow(for: nil))
+    }
+
+    func testSpokenTextUsesKanaNotKanji() {
+        let word = Vocabulary.all.first { $0.kanji == "水" }!
+        XCTAssertEqual(SpokenText.text(for: word), "みず")
+        let kanjiTarget = WritingTarget.kanji(in: word).first!
+        XCTAssertEqual(SpokenText.text(for: kanjiTarget), "みず")
+        let kanaTarget = WritingTarget.kana(KanaTable.hiragana[0])
+        XCTAssertEqual(SpokenText.text(for: kanaTarget), "あ")
+    }
+
+    func testNewSettingsDefaultForOldSaves() throws {
+        let p = try JSONDecoder().decode(Progress.self, from: Data(#"{"xp": 5}"#.utf8))
+        XCTAssertEqual(p.romajiMode, .fading)
+        XCTAssertTrue(p.autoSpeak)
+    }
+}

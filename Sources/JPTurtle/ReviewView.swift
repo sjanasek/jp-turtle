@@ -76,6 +76,9 @@ struct ReviewView: View {
         question = QuizFactory.question(for: word, mode: mode)
         selection = nil
         usedHint = false
+        if mode == .wordToMeaning, model.progress.autoSpeak {
+            SpeechService.shared.speak(SpokenText.text(for: word))
+        }
     }
 
     private func quiz(_ q: QuizQuestion) -> some View {
@@ -85,7 +88,11 @@ struct ReviewView: View {
                 promptCard(q)
                 VStack(spacing: 10) {
                     ForEach(Array(q.choices.enumerated()), id: \.offset) { i, choice in
-                        ChoiceButton(text: q.label(for: choice), state: state(for: i, in: q)) {
+                        ChoiceButton(
+                            text: q.label(for: choice),
+                            state: state(for: i, in: q),
+                            caption: q.mode == .meaningToWord && showHelp(for: choice) ? choice.romaji : nil
+                        ) {
                             select(i, in: q)
                         }
                     }
@@ -119,11 +126,14 @@ struct ReviewView: View {
                 .font(.system(size: q.mode == .wordToMeaning ? 52 : 32, weight: .bold))
                 .minimumScaleFactor(0.5)
                 .multilineTextAlignment(.center)
-            if q.mode == .wordToMeaning, selection != nil || isNew || usedHint {
+            if q.mode == .wordToMeaning, selection != nil || usedHint || showHelp(for: q.word) {
                 VStack(spacing: 2) {
                     if q.word.hasSeparateReading { Text(q.word.kana).font(.title3) }
                     Text(q.word.romaji).font(.subheadline).foregroundStyle(.secondary)
                 }
+            }
+            if q.mode == .wordToMeaning || selection != nil {
+                SpeakButton(text: SpokenText.text(for: q.word))
             }
             if q.mode == .meaningToWord, usedHint, selection == nil {
                 Text("Beginnt mit „\(q.word.romaji.prefix(2))…“")
@@ -141,6 +151,11 @@ struct ReviewView: View {
         .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 24))
     }
 
+    /// Lautschrift laut Einstellung (Standard: am Anfang immer, bei gemeisterten Wörtern nicht mehr).
+    private func showHelp(for word: VocabWord) -> Bool {
+        model.progress.romajiMode.shouldShow(for: model.card(for: word))
+    }
+
     private func state(for i: Int, in q: QuizQuestion) -> ChoiceButton.Status {
         guard let selection else { return .idle }
         if i == q.correctIndex { return .correct }
@@ -151,6 +166,9 @@ struct ReviewView: View {
     private func select(_ i: Int, in q: QuizQuestion) {
         guard selection == nil else { return }
         selection = i
+        if q.mode == .meaningToWord, model.progress.autoSpeak {
+            SpeechService.shared.speak(SpokenText.text(for: q.word))
+        }
         if q.isCorrect(i) {
             correct += 1
             combo += 1

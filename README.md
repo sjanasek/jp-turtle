@@ -64,9 +64,21 @@ gemeistert hast, bekommt der Panzer ein neues Muster.
 - **Serie & Kame** (klein / rund / inline): Serie, fällige Karten, Kames Stufe.
 - Jedes Widget öffnet per Deep Link (`jpturtle://…`) die passende Stelle in der App.
 
-Noch nicht drin, bewusst für später: **Sprechen üben** (Spracherkennung /
-Aussprache). Die Architektur ist darauf vorbereitet (eigener Tab, eigene
-Quest-Art), aber nichts davon ist implementiert.
+### Aussprache und Lautschrift
+- **Sprachausgabe** (Systemstimme ja-JP, offline, etwas langsamer als normal):
+  Lautsprecher-Knopf im Quiz, im Kana-Dojo, im Schreib-Dojo und im Wörterbuch.
+  Optional automatisch: Vokabeln werden beim Erscheinen vorgelesen, im
+  Kana-Quiz erst nach der Antwort (sonst wäre die Antwort verraten).
+  Gesprochen wird immer die Kana-Lesung, nie das Kanji.
+- **Lautschrift (Romaji)** steht von Anfang an unter den Zeichen. Standard
+  ist „Ausblenden, wenn gemeistert“: Die Stütze verschwindet pro Wort von
+  selbst. Einstellbar unter „Mehr“ (immer / ausblenden / nie).
+- Für eine natürlichere Stimme: Einstellungen → Bedienungshilfen →
+  Gesprochene Inhalte → Stimmen → Japanisch (erweiterte Stimme laden).
+- Die Widgets spielen keinen Ton ab, das erlaubt iOS dort nicht ohne App-Start.
+
+Noch nicht drin, bewusst für später: **Nachsprechen und Aussprache bewerten**
+(Spracherkennung). Anhören gibt es, Selbst-Sprechen nicht.
 
 ## Projektstruktur
 
@@ -205,7 +217,7 @@ und `SharedStore.appGroupID` müssen zusammenpassen (`group.<bundleID>`).
   `Strokes.swift` nachtragen (ein Test meckert sonst).
 - **Neue Quests / Achievements / Sticker**: `Progress.swift` bzw. `Rewards.swift`.
 - **Hanas Sprüche**: `Hana.swift`.
-- **Roadmap**: Sprechen üben (Speech-Framework), Beispielsätze, Grammatik-Dojo,
+- **Roadmap**: Nachsprechen (Speech-Framework), Beispielsätze, Grammatik-Dojo,
   Strichreihenfolge-Animationen, Lernstatistik-Diagramme.
 
 ## Tests

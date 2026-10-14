@@ -151,6 +151,20 @@ final class AppModel: ObservableObject {
         reload()
     }
 
+    func setRomajiMode(_ mode: RomajiMode) {
+        var p = store.loadProgress()
+        p.romajiMode = mode
+        store.save(p)
+        reload()
+    }
+
+    func setAutoSpeak(_ on: Bool) {
+        var p = store.loadProgress()
+        p.autoSpeak = on
+        store.save(p)
+        reload()
+    }
+
     func resetEverything() {
         store.wipe()
         reload()

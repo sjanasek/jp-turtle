@@ -147,17 +147,23 @@ struct KanaRoundView: View {
         let q = round.questions[index]
         return VStack(spacing: 20) {
             Spacer()
-            Text(q.kana.character)
-                .font(.system(size: 120, weight: .bold))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
-                .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 24))
+            VStack(spacing: 8) {
+                Text(q.kana.character)
+                    .font(.system(size: 120, weight: .bold))
+                SpeakButton(text: SpokenText.text(for: q.kana))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 20)
+            .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 24))
             VStack(spacing: 10) {
                 ForEach(Array(q.choices.enumerated()), id: \.offset) { i, choice in
                     ChoiceButton(text: choice.romaji, state: state(i, q.correctIndex)) {
                         guard selection == nil else { return }
                         selection = i
                         results.append((q.kana, i == q.correctIndex))
+                        if model.progress.autoSpeak {
+                            SpeechService.shared.speak(SpokenText.text(for: q.kana))
+                        }
                         Task {
                             try? await Task.sleep(for: .milliseconds(i == q.correctIndex ? 450 : 1100))
                             advance()
