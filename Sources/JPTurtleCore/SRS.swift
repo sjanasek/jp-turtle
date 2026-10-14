@@ -32,6 +32,8 @@ public struct CardState: Codable, Hashable, Sendable {
     public var lapses: Int
     public var due: Date
     public var lastReview: Date?
+    /// Richtige Antworten insgesamt (auch Schreib-Bonus). Ab `World.unlockThreshold` zieht das Wort als Item in Kames Welt ein.
+    public var correctCount: Int = 0
 
     public init(wordID: String, now: Date = Date()) {
         self.wordID = wordID
@@ -41,6 +43,19 @@ public struct CardState: Codable, Hashable, Sendable {
         self.lapses = 0
         self.due = now
         self.lastReview = nil
+    }
+
+    // Tolerantes Decoding: fehlende Keys (ältere Speicherstände) bekommen Defaults.
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        wordID = try c.decode(String.self, forKey: .wordID)
+        intervalDays = (try? c.decode(Double.self, forKey: .intervalDays)) ?? 0
+        ease = (try? c.decode(Double.self, forKey: .ease)) ?? 2.5
+        repetitions = (try? c.decode(Int.self, forKey: .repetitions)) ?? 0
+        lapses = (try? c.decode(Int.self, forKey: .lapses)) ?? 0
+        due = (try? c.decode(Date.self, forKey: .due)) ?? Date()
+        lastReview = try? c.decodeIfPresent(Date.self, forKey: .lastReview)
+        correctCount = (try? c.decode(Int.self, forKey: .correctCount)) ?? 0
     }
 
     public var isNew: Bool { lastReview == nil }
@@ -77,6 +92,7 @@ public enum Scheduler {
         }
 
         c.repetitions += 1
+        c.correctCount += 1
         let next: Double
         switch c.repetitions {
         case 1: next = 1

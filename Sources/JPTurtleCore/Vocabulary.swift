@@ -345,6 +345,15 @@ public enum Vocabulary {
         add(nil, "たくさん", "takusan", "viel", .misc)
         add(nil, "ゆっくり", "yukkuri", "langsam, gemütlich", .misc)
 
+        // MARK: Teich (für Kames Welt, bewusst ganz hinten angehängt: IDs bleiben stabil)
+        add("波", "なみ", "nami", "Welle", .nature, level: 4)
+        add("池", "いけ", "ike", "Teich", .nature, level: 4)
+        add("蛙", "かえる", "kaeru", "Frosch", .animals, level: 3)
+        add("鯉", "こい", "koi", "Koi (Karpfen)", .animals, level: 3)
+        add("船", "ふね", "fune", "Schiff, Boot", .objects, level: 4)
+        add("橋", "はし", "hashi", "Brücke", .places, level: 4)
+        add("石", "いし", "ishi", "Stein", .nature, level: 4)
+
         return list
     }
     // swiftlint:enable function_body_length

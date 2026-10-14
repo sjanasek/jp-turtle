@@ -13,7 +13,13 @@ struct HomeView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     HanaBubble(mood: model.hanaMood, friendship: model.progress.friendship, text: model.hanaLine)
-                    heroCard
+                    NavigationLink {
+                        FriendsView()
+                    } label: {
+                        heroCard
+                    }
+                    .buttonStyle(.plain)
+                    worldCard
                     statsRow
                     if model.progress.comebackBonusRemaining > 0 {
                         comebackBanner
@@ -62,6 +68,59 @@ struct HomeView: View {
         }
         .padding()
         .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 20))
+    }
+
+    /// Kames Welt auf der Startseite: aktuelles Gebiet, Fortschritt und direkter Einstieg.
+    @ViewBuilder
+    private var worldCard: some View {
+        if let region = model.currentRegion {
+            let done = World.unlockedCount(in: region, cards: model.cards)
+            let style = RegionStyle.of(region.id)
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 12) {
+                    Image(systemName: region.symbol)
+                        .font(.title2)
+                        .foregroundStyle(.white)
+                        .frame(width: 44, height: 44)
+                        .background(style.gradient, in: RoundedRectangle(cornerRadius: 12))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Kames Welt · \(region.title) \(region.japanese)").font(.headline)
+                        Text("\(done)/\(region.items.count) Items · gesamt \(model.worldUnlocked)/\(model.worldTotal)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                }
+                ProgressView(value: Double(done), total: Double(max(1, region.items.count)))
+                    .tint(style.accent)
+                HStack(spacing: 10) {
+                    Button {
+                        session = ReviewSession(words: model.makeRegionSession(region))
+                    } label: {
+                        Text("Hier lernen")
+                            .font(.subheadline.bold())
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(style.accent, in: RoundedRectangle(cornerRadius: 12))
+                            .foregroundStyle(.white)
+                    }
+                    .buttonStyle(.plain)
+                    Button {
+                        model.selectedTab = .world
+                    } label: {
+                        Text("Zur Karte")
+                            .font(.subheadline.bold())
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 12))
+                            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(style.accent.opacity(0.5)))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding()
+            .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 20))
+        }
     }
 
     private var statsRow: some View {

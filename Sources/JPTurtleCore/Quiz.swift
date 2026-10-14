@@ -135,15 +135,36 @@ public enum SessionPlanner {
         cards: [String: CardState],
         size: Int,
         newWordShare: Int = 3,
+        pool: [VocabWord] = Vocabulary.all,
         now: Date = Date()
     ) -> [VocabWord] {
         var result = dueWords(cards: cards, now: now, limit: size)
         let newLimit = max(0, min(newWordShare, size - result.count))
-        result += newWords(cards: cards, limit: newLimit)
+        result += newWords(cards: cards, limit: newLimit, pool: pool)
         if result.isEmpty {
             // Nichts fällig und alles bekannt: zufällige Auffrischung.
-            result = Array(Vocabulary.all.shuffled().prefix(size))
+            result = Array(pool.shuffled().prefix(size))
         }
         return result
+    }
+
+    /// Sitzung für ein Gebiet: erst Wörter, die noch nicht zum Item wurden (fällige,
+    /// dann angefangene, dann neue), danach – wenn das Gebiet fertig ist – zur Auffrischung alle.
+    public static func regionSession(
+        region: WorldRegion,
+        cards: [String: CardState],
+        size: Int = 5,
+        now: Date = Date()
+    ) -> [VocabWord] {
+        let words = region.words
+        let locked = words.filter { !World.isUnlocked($0, cards: cards) }
+        let pool = locked.isEmpty ? words : locked
+        let due = pool.filter { cards[$0.id].map { !$0.isNew && $0.isDue(at: now) } ?? false }
+        let dueIDs = Set(due.map(\.id))
+        let started = pool
+            .filter { !dueIDs.contains($0.id) && cards[$0.id] != nil }
+            .sorted { World.correctCount($0, cards: cards) > World.correctCount($1, cards: cards) }
+        let fresh = pool.filter { cards[$0.id] == nil }
+        return Array((due + started + fresh).prefix(size))
     }
 }

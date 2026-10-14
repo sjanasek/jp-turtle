@@ -63,6 +63,7 @@ public enum StrokeCounts {
         "犬": 4, "猫": 11, "鳥": 11, "馬": 10, "亀": 11,
         "目": 5, "口": 3, "耳": 6, "足": 7, "頭": 16, "体": 7, "顔": 18,
         "何": 7, "誰": 15, "緒": 14,
+        "波": 8, "池": 6, "蛙": 12, "鯉": 18, "船": 11, "橋": 16, "石": 5,
     ]
 
     public static func count(for character: String) -> Int? {
@@ -81,15 +82,18 @@ public struct WritingTarget: Identifiable, Hashable, Sendable {
     /// Bedeutung (bei Kanji das Wort, aus dem es stammt).
     public let meaning: String?
     public let strokes: Int?
+    /// Vokabel, aus der das Kanji stammt (nur bei Kanji). Gutes Schreiben zählt dafür als Übungs-Bonus.
+    public let wordID: String?
 
     public var id: String { "\(kind.rawValue)-\(character)" }
 
-    public init(character: String, kind: Kind, reading: String, meaning: String?, strokes: Int?) {
+    public init(character: String, kind: Kind, reading: String, meaning: String?, strokes: Int?, wordID: String? = nil) {
         self.character = character
         self.kind = kind
         self.reading = reading
         self.meaning = meaning
         self.strokes = strokes
+        self.wordID = wordID
     }
 
     public static func kana(_ k: Kana) -> WritingTarget {
@@ -113,7 +117,8 @@ public struct WritingTarget: Identifiable, Hashable, Sendable {
                 kind: .kanji,
                 reading: word.kana,
                 meaning: "\(word.display) = \(word.meaning)",
-                strokes: StrokeCounts.kanji[s]
+                strokes: StrokeCounts.kanji[s],
+                wordID: word.id
             )
         }
     }

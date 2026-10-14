@@ -21,6 +21,7 @@ struct ReviewView: View {
     @State private var finished = false
     @State private var hanaMood: HanaMood = .cheer
     @State private var hanaLine = ""
+    @State private var unlockedIDs: [String] = []
 
     /// x1 bis 3 Richtige, x1.5 ab 3, x2 ab 6 in Folge.
     private var multiplier: Double { combo >= 6 ? 2 : (combo >= 3 ? 1.5 : 1) }
@@ -225,6 +226,7 @@ struct ReviewView: View {
         guard let q = question else { return }
         let outcome = model.answer(q.word, grade: grade, comboMultiplier: multiplier, usedHint: usedHint)
         sessionXP += outcome.xpGained
+        unlockedIDs += outcome.unlockedWordIDs
         if outcome.newStage != nil || !outcome.achievements.isEmpty {
             hanaMood = .surprised
             hanaLine = HanaLines.line(for: .surprised)
@@ -251,6 +253,19 @@ struct ReviewView: View {
                 StatPill(symbol: "star.fill", value: "+\(sessionXP)", label: "XP", tint: Theme.sun)
                 StatPill(symbol: "checkmark", value: "\(correct)/\(words.count)", label: "richtig")
                 StatPill(symbol: "bolt.fill", value: "\(bestCombo)", label: "beste Combo", tint: Theme.sun)
+            }
+            if !unlockedIDs.isEmpty {
+                VStack(spacing: 6) {
+                    Label("Neu in Kames Welt", systemImage: "sparkles")
+                        .font(.subheadline.bold())
+                        .foregroundStyle(Theme.accent)
+                    Text(unlockedIDs.compactMap(Vocabulary.word(id:)).map { "\($0.display) (\($0.meaning))" }.joined(separator: " · "))
+                        .font(.footnote)
+                        .multilineTextAlignment(.center)
+                }
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(Theme.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 16))
             }
             if model.chestAvailable {
                 Label("Tageskiste freigeschaltet – auf der Startseite öffnen!", systemImage: "shippingbox.fill")

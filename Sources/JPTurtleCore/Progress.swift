@@ -115,6 +115,9 @@ public struct Progress: Codable, Equatable, Sendable {
     /// Anzahl Tage, die vor dem letzten Lernen pausiert wurden (für Hanas Begrüßung).
     public var lastGapDays: Int = 0
 
+    /// Gebiete von Kames Welt, deren Items alle freigeschaltet sind.
+    public var completedRegions: [String] = []
+
     // Einstellungen
     public var romajiMode: RomajiMode = .fading
     public var autoSpeak: Bool = true
@@ -159,6 +162,7 @@ public struct Progress: Codable, Equatable, Sendable {
         chestOpenedDay = try c.decodeIfPresent(String.self, forKey: .chestOpenedDay)
         comebackBonusRemaining = get(.comebackBonusRemaining, 0)
         lastGapDays = get(.lastGapDays, 0)
+        completedRegions = get(.completedRegions, [])
         romajiMode = get(.romajiMode, .fading)
         autoSpeak = get(.autoSpeak, true)
         totalWritings = get(.totalWritings, 0)

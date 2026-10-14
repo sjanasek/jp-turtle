@@ -39,6 +39,10 @@ struct RootView: View {
                 .tabItem { Label("Heute", systemImage: "sun.max") }
                 .tag(AppModel.Tab.home)
 
+            WorldView()
+                .tabItem { Label("Welt", systemImage: "map") }
+                .tag(AppModel.Tab.world)
+
             WritingDojoView()
                 .tabItem { Label("Schreiben", systemImage: "pencil.and.scribble") }
                 .tag(AppModel.Tab.writing)
@@ -46,10 +50,6 @@ struct RootView: View {
             KanaDojoView()
                 .tabItem { Label("Kana", systemImage: "character.ja") }
                 .tag(AppModel.Tab.kana)
-
-            FriendsView()
-                .tabItem { Label("Hana & Kame", systemImage: "heart") }
-                .tag(AppModel.Tab.friends)
 
             SettingsView()
                 .tabItem { Label("Mehr", systemImage: "ellipsis.circle") }

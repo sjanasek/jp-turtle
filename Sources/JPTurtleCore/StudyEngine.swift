@@ -12,6 +12,12 @@ public struct ReviewOutcome: Equatable, Sendable {
     public var newFriendship: FriendshipLevel?
     public var comebackBonusApplied: Bool
     public var card: CardState?
+    /// Wörter, die durch diese Aktion zu Items in Kames Welt wurden.
+    public var unlockedWordIDs: [String] = []
+    /// Gebiete, über denen der Nebel gewichen ist.
+    public var openedRegionIDs: [String] = []
+    /// Gebiete, die jetzt vollständig sind.
+    public var completedRegionIDs: [String] = []
 
     public var streakExtended: Bool {
         switch streakEvent {
@@ -23,7 +29,8 @@ public struct ReviewOutcome: Equatable, Sendable {
 
     /// Passende Stimmung für Hana.
     public var hanaMood: HanaMood {
-        if newStage != nil || !achievements.isEmpty { return .surprised }
+        if newStage != nil || !achievements.isEmpty || !completedRegionIDs.isEmpty { return .surprised }
+        if !unlockedWordIDs.isEmpty || !openedRegionIDs.isEmpty { return .proud }
         if newFriendship != nil || !completedQuests.isEmpty { return .proud }
         if case .restarted(let gap) = streakEvent, gap >= 3 { return .welcomeBack }
         return .happy
@@ -58,9 +65,19 @@ public struct StudyEngine: Sendable {
         var progress = store.loadProgress()
         let before = progress.stage
 
+        let cardsBefore = cards
         let old = cards[wordID] ?? CardState(wordID: wordID, now: now)
         let wasNew = old.isNew
-        let card = Scheduler.review(old, grade: grade, now: now)
+        let card: CardState
+        if !wasNew, !old.isDue(at: now), grade.isCorrect {
+            // Frühes Üben (z. B. Gebietssitzung): zählt fürs Freischalten, verschiebt aber den
+            // Wiederholungstermin nicht. So bleibt die Spaced Repetition ehrlich.
+            var early = old
+            early.correctCount += 1
+            card = early
+        } else {
+            card = Scheduler.review(old, grade: grade, now: now)
+        }
         cards[wordID] = card
 
         let streakEvent = progress.registerStudy(now: now)
@@ -93,7 +110,8 @@ public struct StudyEngine: Sendable {
         xp += streakBonus(for: streakEvent, streak: progress.streak)
         progress.xp += xp
 
-        return finish(&progress, cards: cards, baseXP: xp, streakEvent: streakEvent, before: before, card: card, comeback: comeback, viaWidget: source == .widget, hearts: heartsFor(streakEvent))
+        let world = World.change(before: cardsBefore, after: cards, completed: &progress.completedRegions)
+        return finish(&progress, cards: cards, baseXP: xp, streakEvent: streakEvent, before: before, card: card, saveCards: true, comeback: comeback, viaWidget: source == .widget, hearts: heartsFor(streakEvent), world: world)
     }
 
     // MARK: Kana-Dojo
@@ -114,7 +132,7 @@ public struct StudyEngine: Sendable {
         xp += streakBonus(for: streakEvent, streak: progress.streak)
         progress.xp += xp
 
-        return finish(&progress, cards: store.loadCards(), baseXP: xp, streakEvent: streakEvent, before: before, card: nil, comeback: false, viaWidget: false, hearts: heartsFor(streakEvent) + 1)
+        return finish(&progress, cards: store.loadCards(), baseXP: xp, streakEvent: streakEvent, before: before, card: nil, saveCards: false, comeback: false, viaWidget: false, hearts: heartsFor(streakEvent) + 1, world: .none)
     }
 
     // MARK: Schreiben
@@ -125,6 +143,17 @@ public struct StudyEngine: Sendable {
         var progress = store.loadProgress()
         let before = progress.stage
         let streakEvent = progress.registerStudy(now: now)
+
+        var cards = store.loadCards()
+        let cardsBefore = cards
+        var cardsChanged = false
+        if score.total >= World.stampScore, let wordID = target.wordID {
+            // Gutes Schreiben zählt für das Wort doppelt: Items per Schreiben freischalten.
+            var card = cards[wordID] ?? CardState(wordID: wordID, now: now)
+            card.correctCount += World.writingBonus
+            cards[wordID] = card
+            cardsChanged = true
+        }
 
         progress.totalWritings += 1
         progress.writingsToday += 1
@@ -142,7 +171,8 @@ public struct StudyEngine: Sendable {
         xp += streakBonus(for: streakEvent, streak: progress.streak)
         progress.xp += xp
 
-        return finish(&progress, cards: store.loadCards(), baseXP: xp, streakEvent: streakEvent, before: before, card: nil, comeback: false, viaWidget: false, hearts: heartsFor(streakEvent) + (score.isPerfect ? 1 : 0))
+        let world = World.change(before: cardsBefore, after: cards, completed: &progress.completedRegions)
+        return finish(&progress, cards: cards, baseXP: xp, streakEvent: streakEvent, before: before, card: nil, saveCards: cardsChanged, comeback: false, viaWidget: false, hearts: heartsFor(streakEvent) + (score.isPerfect ? 1 : 0), world: world)
     }
 
     // MARK: Tageskiste
@@ -213,13 +243,17 @@ public struct StudyEngine: Sendable {
         streakEvent: Progress.StreakEvent,
         before: TurtleStage,
         card: CardState?,
+        saveCards: Bool,
         comeback: Bool,
         viaWidget: Bool,
-        hearts: Int
+        hearts: Int,
+        world: World.Change
     ) -> ReviewOutcome {
         var xp = baseXP
         let friendshipBefore = progress.friendship
-        progress.hearts += hearts
+        progress.hearts += hearts + world.hearts
+        progress.xp += world.xp
+        xp += world.xp
 
         let quests = progress.checkQuests()
         xp += quests.reduce(0) { $0 + $1.rewardXP }
@@ -227,7 +261,7 @@ public struct StudyEngine: Sendable {
         let unlocked = Achievement.evaluate(progress: &progress, cards: cards, streakEvent: streakEvent, viaWidget: viaWidget)
         xp += unlocked.reduce(0) { $0 + $1.rewardXP }
 
-        if card != nil { store.save(cards) }
+        if saveCards { store.save(cards) }
         store.save(progress)
 
         let after = progress.stage
@@ -241,7 +275,10 @@ public struct StudyEngine: Sendable {
             heartsGained: hearts,
             newFriendship: friendshipAfter > friendshipBefore ? friendshipAfter : nil,
             comebackBonusApplied: comeback,
-            card: card
+            card: card,
+            unlockedWordIDs: world.unlockedWordIDs,
+            openedRegionIDs: world.openedRegionIDs,
+            completedRegionIDs: world.completedRegionIDs
         )
     }
 }

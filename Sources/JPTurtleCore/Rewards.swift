@@ -109,6 +109,9 @@ public struct Achievement: Identifiable, Hashable, Sendable {
         Achievement(id: "widget-first", title: "Sperrbildschirm-Lerner", detail: "Erste Antwort über ein Widget.", symbol: "lock.iphone", rewardXP: 15),
         Achievement(id: "hana-friend", title: "Hanas Freund", detail: "Freundschaftsstufe „Freunde“ erreicht.", symbol: "heart.fill", rewardXP: 50),
         Achievement(id: "stickers-6", title: "Halbes Album", detail: "6 Sticker gesammelt.", symbol: "square.grid.3x3.fill", rewardXP: 40),
+        Achievement(id: "item-first", title: "Erstes Item", detail: "Ein Wort ist in Kames Welt eingezogen.", symbol: "sparkles", rewardXP: 15),
+        Achievement(id: "region-first", title: "Gebiet vollständig", detail: "Alle Items eines Gebiets freigeschaltet.", symbol: "map.fill", rewardXP: 60),
+        Achievement(id: "world-complete", title: "Kames Welt vollständig", detail: "Alle Gebiete sind voller Leben.", symbol: "globe.asia.australia.fill", rewardXP: 500),
         Achievement(id: "turtle-wanderer", title: "Reisende Kame", detail: "Kame ist Wanderer geworden.", symbol: "tortoise.fill", rewardXP: 60),
     ]
 
@@ -143,6 +146,9 @@ public struct Achievement: Identifiable, Hashable, Sendable {
             case "widget-first": return viaWidget
             case "hana-friend": return progress.friendship >= .friend
             case "stickers-6": return progress.stickers.count >= 6
+            case "item-first": return World.unlockedCount(cards: cards) >= 1
+            case "region-first": return !progress.completedRegions.isEmpty
+            case "world-complete": return progress.completedRegions.count == World.regions.count
             case "turtle-wanderer": return progress.stage >= .wanderer
             default: return false
             }

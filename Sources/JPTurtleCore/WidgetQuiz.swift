@@ -58,7 +58,8 @@ public enum WidgetQuiz {
         if let pick = due.randomElement(using: &rng) {
             word = pick
         } else {
-            let unseen = SessionPlanner.newWords(cards: cards, limit: 20).filter { $0.id != previous?.wordID }
+            let unseen = SessionPlanner.newWords(cards: cards, limit: 20, pool: World.openWords(cards: cards))
+                .filter { $0.id != previous?.wordID }
             word = unseen.randomElement(using: &rng)
                 ?? Vocabulary.all.randomElement(using: &rng)
                 ?? Vocabulary.all[0]

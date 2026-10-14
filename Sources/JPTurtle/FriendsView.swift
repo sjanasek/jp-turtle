@@ -8,21 +8,20 @@ struct FriendsView: View {
     @EnvironmentObject private var model: AppModel
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 16) {
-                    hanaCard
-                    kameCard
-                    stickerAlbum
-                    achievements
-                    shellCollection
-                    stats
-                }
-                .padding()
+        ScrollView {
+            VStack(spacing: 16) {
+                hanaCard
+                kameCard
+                stickerAlbum
+                achievements
+                shellCollection
+                stats
             }
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle("Hana & Kame")
+            .padding()
         }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("Hana & Kame")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     // MARK: Hana

@@ -11,6 +11,11 @@ struct SettingsView: View {
             Form {
                 Section {
                     NavigationLink {
+                        FriendsView()
+                    } label: {
+                        Label("Hana & Kame, Sticker, Achievements", systemImage: "heart")
+                    }
+                    NavigationLink {
                         DictionaryView()
                     } label: {
                         Label("Wörterbuch (\(Vocabulary.all.count) Wörter)", systemImage: "book")

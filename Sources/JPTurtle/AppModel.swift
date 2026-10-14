@@ -18,7 +18,7 @@ struct Toast: Equatable, Identifiable {
 /// `StudyEngine`, damit App und Widget dieselben Regeln verwenden.
 @MainActor
 final class AppModel: ObservableObject {
-    enum Tab: Hashable { case home, writing, kana, friends, more }
+    enum Tab: Hashable { case home, world, writing, kana, more }
 
     let store: SharedStore
     let engine: StudyEngine
@@ -61,6 +61,16 @@ final class AppModel: ObservableObject {
 
     func card(for word: VocabWord) -> CardState? { cards[word.id] }
 
+    // MARK: Kames Welt
+
+    var worldUnlocked: Int { World.unlockedCount(cards: cards) }
+    var worldTotal: Int { World.allItems.count }
+    var currentRegion: WorldRegion? { World.currentRegion(cards: cards) }
+
+    func makeRegionSession(_ region: WorldRegion, size: Int = 5) -> [VocabWord] {
+        SessionPlanner.regionSession(region: region, cards: cards, size: size)
+    }
+
     func reload() {
         var p = store.loadProgress()
         p.rollDay(now: Date())
@@ -102,7 +112,8 @@ final class AppModel: ObservableObject {
     /// Stellt die nächste Lernsitzung zusammen. Ein per Deep Link gewünschtes
     /// Wort kommt an den Anfang.
     func makeSession(size: Int? = nil) -> [VocabWord] {
-        var words = SessionPlanner.session(cards: cards, size: size ?? progress.dailyGoal)
+        // Neue Wörter nur aus Gebieten, über denen der Nebel schon gewichen ist.
+        var words = SessionPlanner.session(cards: cards, size: size ?? progress.dailyGoal, pool: World.openWords(cards: cards))
         if let id = requestedReviewWordID, let w = Vocabulary.word(id: id) {
             words.removeAll { $0.id == id }
             words.insert(w, at: 0)
@@ -193,7 +204,7 @@ final class AppModel: ObservableObject {
         case .kana:
             selectedTab = .kana
         case .turtle:
-            selectedTab = .friends
+            selectedTab = .world
         }
     }
 
@@ -202,6 +213,13 @@ final class AppModel: ObservableObject {
     private func announce(_ outcome: ReviewOutcome) {
         if let stage = outcome.newStage {
             show(Toast(title: "Kame ist jetzt: \(stage.title)!", subtitle: stage.flavor, symbol: "tortoise.fill"))
+        } else if let id = outcome.completedRegionIDs.first, let region = World.region(id: id) {
+            show(Toast(title: "\(region.title) ist vollständig!", subtitle: "+\(World.regionBonusXP) XP und \(World.regionBonusHearts) Herzen", symbol: region.symbol))
+        } else if let id = outcome.openedRegionIDs.first, let region = World.region(id: id) {
+            show(Toast(title: "Neues Gebiet: \(region.title) \(region.japanese)", subtitle: "Der Nebel hat sich gelichtet.", symbol: "map.fill"))
+        } else if let id = outcome.unlockedWordIDs.first, let word = Vocabulary.word(id: id) {
+            let region = World.region(containing: id)
+            show(Toast(title: "Neues Item: \(word.display) = \(word.meaning)", subtitle: region.map { "\($0.title): \(World.unlockedCount(in: $0, cards: cards))/\($0.items.count)" }, symbol: "sparkles"))
         } else if let a = outcome.achievements.first.flatMap(Achievement.byID) {
             show(Toast(title: "Achievement: \(a.title)", subtitle: "\(a.detail) +\(a.rewardXP) XP", symbol: a.symbol))
         } else if let f = outcome.newFriendship {
