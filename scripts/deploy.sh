@@ -8,7 +8,7 @@
 #
 # Optionen:
 #   --no-widget       ohne Widget-Extension bauen (Ausweg für xtool-Issue #313)
-#   --team TEAMID     (xcode) Signing-Team gleich eintragen, z. B. --team AB12CD34EF
+#   --team TEAMID     (xcode) Signing-Team festlegen; ohne Angabe wird es automatisch gesucht
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -43,6 +43,32 @@ need_login() {
     echo "Mit kostenloser Apple-ID im Menü '1: Password' wählen."
     xtool setup
   fi
+}
+
+# Team-ID automatisch finden: erst aus Xcodes Account-Einstellungen, sonst aus dem
+# Entwickler-Zertifikat im Schlüsselbund. Bezahlte Teams haben Vorrang.
+detect_team() {
+  local found
+  found="$(defaults export com.apple.dt.Xcode - 2>/dev/null | /usr/bin/python3 -c '
+import plistlib, sys
+try:
+    d = plistlib.loads(sys.stdin.buffer.read())
+except Exception:
+    sys.exit(0)
+teams = []
+for key in ("IDEProvisioningTeamByIdentifier", "IDEProvisioningTeams"):
+    for lst in (d.get(key) or {}).values():
+        for t in lst:
+            if t.get("teamID"):
+                teams.append((bool(t.get("isFreeProvisioningTeam", False)), t["teamID"], t.get("teamName", "")))
+for free, tid, name in sorted(set(teams)):
+    print(tid + "\t" + name + ("\t(kostenlos)" if free else ""))
+' 2>/dev/null || true)"
+  if [[ -z "$found" ]]; then
+    found="$(security find-certificate -a -c "Apple Development" -p 2>/dev/null \
+      | openssl x509 -noout -subject 2>/dev/null | grep -Eo 'OU ?= ?[A-Z0-9]{10}' | grep -Eo '[A-Z0-9]{10}$' | head -1 || true)"
+  fi
+  printf '%s' "$found"
 }
 
 bundle_id() { awk '/^bundleID:/ {print $2; exit}' xtool.yml; }
@@ -103,6 +129,17 @@ TXT
     need_mac; need_xcode; need_xtool
     without_widget_if_requested
     say "Erzeuge Xcode-Projekt"
+    if [[ -z "$TEAM" ]]; then
+      TEAMS="$(detect_team)"
+      if [[ -n "$TEAMS" ]]; then
+        say "Gefundene Teams aus deinem Xcode-Login"
+        echo "$TEAMS"
+        TEAM="$(echo "$TEAMS" | head -1 | cut -f1)"
+        echo "Verwende: $TEAM  (anderes Team: scripts/deploy.sh xcode --team ID)"
+      else
+        warn "Konnte keine Team-ID finden. Dann in Xcode bei beiden Targets unter 'Signing & Capabilities' das Team wählen."
+      fi
+    fi
     OUT="$(xtool dev generate-xcode-project | tee /dev/stderr | sed -n 's/^Wrote to //p' | tail -1)"
     [[ -n "$OUT" ]] || fail "xtool hat kein Projekt gemeldet."
     PBX="$(find xtool/.xtool-tmp -name project.pbxproj -path '*JPTurtle.xcodeproj*' | head -1)"
