@@ -40,6 +40,15 @@ gemeistert hast, bekommt der Panzer ein neues Muster.
 - **Wörterbuch** mit Suche, Kategorie-Filter und Lernstatus pro Wort.
 
 ### Kames Welt (das Herzstück)
+Kames Welt ist eine **Abenteuerkarte**: Ein Sandweg schlängelt sich im Zickzack von Gebiet
+zu Gebiet, jedes Gebiet hat eine eigene kleine Landschaft (Teich mit Koi und Brücke,
+Teehaus, rotes Torii, Kirschbaum-Garten, Dorf, verschneiter Berg ...). Tippst du ein
+offenes Gebiet an, **läuft Kame den Weg entlang dorthin**, die Karte scrollt mit, und unten
+erscheint das Gebiet mit „Hier lernen“ und „Gebiet ansehen“. Gesperrte Gebiete liegen
+im Nebel, der noch nicht begehbare Weg ist nur als Trittsteine angedeutet. Freigeschaltete
+Items erscheinen als kleine Plaketten unter dem Gebietsschild. Die Geometrie der Karte
+(`WorldMap.swift`) liegt im testbaren Kern.
+
 Gelernte Wörter ziehen als **Items** in Kames Welt ein, und die Welt füllt sich Gebiet für Gebiet:
 
 - **Freischalten:** Ein Wort wird zum Item, sobald du es **5-mal richtig** beantwortet hast.
@@ -116,10 +125,12 @@ Sources/JPTurtleCore/              Foundation-only Kern – läuft auch unter Li
   StudyEngine.swift                Einzige Schreib-API auf den Speicher (App + Widget)
   WidgetQuiz.swift                 Zustand und Regeln des Widget-Quiz
   World.swift                      Kames Welt: Gebiete, Items, Freischalt-Regeln
+  WorldMap.swift                   Geometrie der Abenteuerkarte (Weg, Positionen)
   SharedStore.swift                UserDefaults, App Group wenn verfügbar
 Sources/JPTurtle/                  SwiftUI-App (iOS 17+)
 Sources/JPTurtleWidget/            WidgetKit-Extension + App Intents
 Tests/JPTurtleCoreTests/           Unit-Tests für den Kern (`swift test`)
+scripts/deploy.sh                  Testen, Simulator, iPhone oder Xcode (macOS)
 ```
 
 App und Widget teilen sich `JPTurtleCore`. Alles, was Fortschritt verändert,
@@ -136,6 +147,19 @@ braucht es trotzdem (auf dem Mac aus Xcode, unter Linux aus einer
 `Xcode.xip`). Mit einer **kostenlosen Apple-ID** gilt wie bei Xcode: die App
 läuft 7 Tage, dann neu installieren (`xtool dev` nochmal), max. 3 Apps
 gleichzeitig, kein App Store. Mit bezahltem Developer-Account entfällt das.
+
+### Schnellweg auf dem Mac: `scripts/deploy.sh`
+
+```bash
+scripts/deploy.sh test      # Unit-Tests des Kerns
+scripts/deploy.sh sim       # im iOS-Simulator starten, ohne Apple-ID und ohne iPhone
+scripts/deploy.sh iphone    # aufs angeschlossene iPhone (prüft Xcode, xtool, Login)
+scripts/deploy.sh xcode     # Xcode-Projekt erzeugen und öffnen, dann in Xcode ▶
+```
+
+Mit `--no-widget` wird ohne Widget-Extension gebaut. Das ist der Ausweg, falls die
+Installation am offenen xtool-Issue #313 scheitert (siehe unten); `xtool.yml` wird danach
+automatisch wiederhergestellt.
 
 ### macOS (empfohlen, wenn du einen Mac hast)
 1. Xcode aus dem App Store installieren und einmal starten (für SDK + Toolchain).

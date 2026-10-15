@@ -2,59 +2,6 @@
 import SwiftUI
 import JPTurtleCore
 
-/// Kames Welt: Übersicht aller Gebiete. Gebiete mit Nebel sind noch gesperrt.
-struct WorldView: View {
-    @EnvironmentObject private var model: AppModel
-
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 14) {
-                    header
-                    ForEach(World.regions) { region in
-                        if World.isOpen(region, cards: model.cards) {
-                            NavigationLink {
-                                RegionView(region: region)
-                            } label: {
-                                RegionCard(region: region, cards: model.cards, writingBest: model.progress.writingBest)
-                            }
-                            .buttonStyle(.plain)
-                        } else {
-                            FogCard(region: region, have: model.worldUnlocked)
-                        }
-                    }
-                }
-                .padding()
-            }
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle("Kames Welt")
-        }
-    }
-
-    private var header: some View {
-        VStack(spacing: 12) {
-            HStack(spacing: 14) {
-                KameView(stage: model.progress.stage, size: 76)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("\(model.worldUnlocked) von \(model.worldTotal) Items").font(.headline)
-                    Text("Beantworte ein Wort \(World.unlockThreshold)-mal richtig, dann zieht es als Item in Kames Welt ein.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer(minLength: 0)
-            }
-            ProgressView(value: Double(model.worldUnlocked), total: Double(max(1, model.worldTotal)))
-                .tint(Theme.accent)
-            Text("Gutes Schreiben eines Kanji zählt für sein Wort doppelt und gibt dem Item den Tusche-Stempel.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .padding()
-        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 20))
-    }
-}
-
 /// Banner eines offenen Gebiets.
 struct RegionCard: View {
     let region: WorldRegion
@@ -96,33 +43,6 @@ struct RegionCard: View {
         }
         .frame(minHeight: 116)
         .clipShape(RoundedRectangle(cornerRadius: 20))
-    }
-}
-
-/// Gebiet im Nebel: zeigt, wie viele Items noch fehlen.
-struct FogCard: View {
-    let region: WorldRegion
-    let have: Int
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "cloud.fog.fill")
-                .font(.title)
-                .foregroundStyle(.secondary)
-                .frame(width: 44)
-            VStack(alignment: .leading, spacing: 3) {
-                Text("Im Nebel · \(region.japanese)").font(.headline).foregroundStyle(.secondary)
-                Text("Noch \(region.requires - have) Items freischalten, dann lichtet sich der Nebel.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            Image(systemName: "lock.fill").foregroundStyle(.secondary)
-        }
-        .padding()
-        .frame(maxWidth: .infinity)
-        .background(Theme.cardBackground.opacity(0.7), in: RoundedRectangle(cornerRadius: 20))
-        .overlay(RoundedRectangle(cornerRadius: 20).strokeBorder(Color.secondary.opacity(0.2), style: StrokeStyle(lineWidth: 1, dash: [6, 4])))
     }
 }
 
