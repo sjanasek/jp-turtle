@@ -9,7 +9,7 @@ final class ProgressTests: XCTestCase {
     }
 
     func testStreakExtendsOnConsecutiveDays() {
-        var p = Progress()
+        var p = StudyProgress()
         XCTAssertEqual(p.registerStudy(now: day(0), calendar: cal), .restarted(gapDays: 0))
         XCTAssertEqual(p.streak, 1)
         XCTAssertEqual(p.registerStudy(now: day(0), calendar: cal), .alreadyToday)
@@ -18,7 +18,7 @@ final class ProgressTests: XCTestCase {
     }
 
     func testShieldSavesOneMissedDay() {
-        var p = Progress()
+        var p = StudyProgress()
         p.shields = 1
         _ = p.registerStudy(now: day(0), calendar: cal)
         XCTAssertEqual(p.registerStudy(now: day(2), calendar: cal), .shieldUsed)
@@ -27,7 +27,7 @@ final class ProgressTests: XCTestCase {
     }
 
     func testLongGapRestartsWithComebackBonus() {
-        var p = Progress()
+        var p = StudyProgress()
         _ = p.registerStudy(now: day(0), calendar: cal)
         _ = p.registerStudy(now: day(1), calendar: cal)
         XCTAssertEqual(p.registerStudy(now: day(6), calendar: cal), .restarted(gapDays: 5))
@@ -37,14 +37,14 @@ final class ProgressTests: XCTestCase {
     }
 
     func testShieldEarnedEveryFiveDays() {
-        var p = Progress()
+        var p = StudyProgress()
         p.shields = 0
         for i in 0..<5 { _ = p.registerStudy(now: day(i), calendar: cal) }
         XCTAssertEqual(p.shields, 1)
     }
 
     func testDayRollResetsCounters() {
-        var p = Progress()
+        var p = StudyProgress()
         p.rollDay(now: day(0), calendar: cal)
         p.reviewsToday = 7
         p.completedQuestsToday = [.warmup]
@@ -56,7 +56,7 @@ final class ProgressTests: XCTestCase {
     }
 
     func testQuestsAwardXPOnce() {
-        var p = Progress()
+        var p = StudyProgress()
         p.reviewsToday = 10
         let first = p.checkQuests().map(\.kind)
         XCTAssertTrue(first.contains(.reviews))
@@ -76,7 +76,7 @@ final class ProgressTests: XCTestCase {
     func testDecodingOldSaveUsesDefaults() throws {
         // Speicherstand ohne die neuen Gamification-Felder.
         let json = #"{"xp": 42, "streak": 3}"#
-        let p = try JSONDecoder().decode(Progress.self, from: Data(json.utf8))
+        let p = try JSONDecoder().decode(StudyProgress.self, from: Data(json.utf8))
         XCTAssertEqual(p.xp, 42)
         XCTAssertEqual(p.streak, 3)
         XCTAssertEqual(p.shields, 1)
@@ -113,7 +113,7 @@ final class PronunciationTests: XCTestCase {
     }
 
     func testNewSettingsDefaultForOldSaves() throws {
-        let p = try JSONDecoder().decode(Progress.self, from: Data(#"{"xp": 5}"#.utf8))
+        let p = try JSONDecoder().decode(StudyProgress.self, from: Data(#"{"xp": 5}"#.utf8))
         XCTAssertEqual(p.romajiMode, .fading)
         XCTAssertTrue(p.autoSpeak)
     }

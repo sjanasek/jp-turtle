@@ -36,9 +36,9 @@ final class EngineTests: XCTestCase {
     }
 
     func testComebackBonusDoublesXP() {
-        var p = Progress()
+        var p = StudyProgress()
         p.comebackBonusRemaining = 1
-        p.lastStudyDay = Progress.dayKey(Date())
+        p.lastStudyDay = StudyProgress.dayKey(Date())
         store.save(p)
         let engine = StudyEngine(store: store)
         let bonus = engine.review(wordID: "w0010", grade: .good)
@@ -75,7 +75,7 @@ final class EngineTests: XCTestCase {
     }
 
     func testChestOnlyOncePerDay() {
-        var p = Progress()
+        var p = StudyProgress()
         p.rollDay(now: Date())
         p.reviewsToday = p.dailyGoal
         store.save(p)

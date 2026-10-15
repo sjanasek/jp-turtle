@@ -87,7 +87,7 @@ public struct DailyQuest: Identifiable, Hashable, Sendable {
 /// Alles, was den Spielfortschritt ausmacht. Wird als JSON gespeichert.
 /// Neue Felder immer mit Default-Wert anlegen, damit alte Speicherstände
 /// weiter dekodierbar bleiben (siehe `init(from:)`).
-public struct Progress: Codable, Equatable, Sendable {
+public struct StudyProgress: Codable, Equatable, Sendable {
     public var xp: Int = 0
     public var streak: Int = 0
     public var bestStreak: Int = 0
@@ -200,7 +200,7 @@ public struct Progress: Codable, Equatable, Sendable {
     public var dailyGoalReached: Bool { reviewsToday + writingsToday >= dailyGoal }
 
     public func chestAvailable(now: Date, calendar: Calendar = .current) -> Bool {
-        dailyGoalReached && chestOpenedDay != Progress.dayKey(now, calendar: calendar)
+        dailyGoalReached && chestOpenedDay != StudyProgress.dayKey(now, calendar: calendar)
     }
 
     public func kanaMastered(_ script: Kana.Script) -> Int {
@@ -229,7 +229,7 @@ public struct Progress: Codable, Equatable, Sendable {
 
     /// Setzt Tageszähler zurück, wenn ein neuer Tag begonnen hat.
     public mutating func rollDay(now: Date, calendar: Calendar = .current) {
-        let day = Progress.dayKey(now, calendar: calendar)
+        let day = StudyProgress.dayKey(now, calendar: calendar)
         guard today != day else { return }
         today = day
         reviewsToday = 0
@@ -256,11 +256,11 @@ public struct Progress: Codable, Equatable, Sendable {
     @discardableResult
     public mutating func registerStudy(now: Date, calendar: Calendar = .current) -> StreakEvent {
         rollDay(now: now, calendar: calendar)
-        let day = Progress.dayKey(now, calendar: calendar)
+        let day = StudyProgress.dayKey(now, calendar: calendar)
         if lastStudyDay == day { return .alreadyToday }
 
         var gap = Int.max
-        if let last = lastStudyDay, let lastDate = Progress.date(fromDayKey: last, calendar: calendar) {
+        if let last = lastStudyDay, let lastDate = StudyProgress.date(fromDayKey: last, calendar: calendar) {
             gap = calendar.dateComponents([.day], from: calendar.startOfDay(for: lastDate), to: calendar.startOfDay(for: now)).day ?? Int.max
         }
 
@@ -292,7 +292,7 @@ public struct Progress: Codable, Equatable, Sendable {
     /// Prüft, ob die Serie noch lebt (gelernt gestern oder heute, oder Schild vorhanden).
     public func streakIsAlive(now: Date, calendar: Calendar = .current) -> Bool {
         guard let last = lastStudyDay,
-              let lastDate = Progress.date(fromDayKey: last, calendar: calendar) else { return false }
+              let lastDate = StudyProgress.date(fromDayKey: last, calendar: calendar) else { return false }
         let diff = calendar.dateComponents([.day], from: calendar.startOfDay(for: lastDate), to: calendar.startOfDay(for: now)).day ?? 99
         return diff <= 1 || (diff == 2 && shields > 0)
     }

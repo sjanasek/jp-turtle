@@ -20,7 +20,7 @@ struct JPTurtleWidgetBundle: WidgetBundle {
 struct QuizEntry: TimelineEntry {
     let date: Date
     let state: WidgetQuizState
-    let progress: Progress
+    let progress: StudyProgress
     let dueCount: Int
 
     static func placeholder() -> QuizEntry {
@@ -31,7 +31,7 @@ struct QuizEntry: TimelineEntry {
             wordID: w.id, choiceIDs: q.choices.map(\.id), correctIndex: q.correctIndex,
             answeredIndex: nil, revealed: false, createdAt: .now, correctToday: 0, day: ""
         )
-        return QuizEntry(date: .now, state: state, progress: Progress(), dueCount: 0)
+        return QuizEntry(date: .now, state: state, progress: StudyProgress(), dueCount: 0)
     }
 }
 

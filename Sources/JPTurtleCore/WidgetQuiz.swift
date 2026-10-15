@@ -66,7 +66,7 @@ public enum WidgetQuiz {
         }
 
         let q = QuizFactory.question(for: word, mode: .wordToMeaning, choiceCount: 3, using: &rng)
-        let today = Progress.dayKey(now)
+        let today = StudyProgress.dayKey(now)
         let state = WidgetQuizState(
             wordID: word.id,
             choiceIDs: q.choices.map(\.id),

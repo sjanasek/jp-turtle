@@ -119,7 +119,7 @@ Sources/JPTurtleCore/              Foundation-only Kern – läuft auch unter Li
   Vocabulary.swift                 Wortschatz (Code statt JSON, kein Resource-Bundle nötig)
   Kana.swift, Strokes.swift        Kana-Tabellen, Strichzahlen, Schreib-Ziele
   SRS.swift                        Spaced-Repetition-Scheduler
-  Progress.swift                   XP, Serie, Schilde, Quests, Tageszähler
+  StudyProgress.swift                   XP, Serie, Schilde, Quests, Tageszähler
   Hana.swift, Rewards.swift        Charakter, Freundschaft, Kiste, Sticker, Achievements
   Ink.swift                        Bewertung von Handschrift (BitMask + InkScorer)
   StudyEngine.swift                Einzige Schreib-API auf den Speicher (App + Widget)
@@ -261,7 +261,7 @@ und `SharedStore.appGroupID` müssen zusammenpassen (`group.<bundleID>`).
   Kategorie oder ans Ende der Liste setzen, sonst verschieben sich IDs und
   gespeicherte Karten zeigen auf andere Wörter. Bei Kanji die Strichzahl in
   `Strokes.swift` nachtragen (ein Test meckert sonst).
-- **Neue Quests / Achievements / Sticker**: `Progress.swift` bzw. `Rewards.swift`.
+- **Neue Quests / Achievements / Sticker**: `StudyProgress.swift` bzw. `Rewards.swift`.
 - **Hanas Sprüche**: `Hana.swift`.
 - **Roadmap**: Nachsprechen (Speech-Framework), Beispielsätze, Grammatik-Dojo,
   Strichreihenfolge-Animationen, Lernstatistik-Diagramme.

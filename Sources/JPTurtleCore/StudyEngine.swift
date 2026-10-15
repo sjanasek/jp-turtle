@@ -4,7 +4,7 @@ import Foundation
 /// Stufenaufstiege, Quests, Achievements und Hanas Reaktion zeigen kann.
 public struct ReviewOutcome: Equatable, Sendable {
     public var xpGained: Int
-    public var streakEvent: Progress.StreakEvent
+    public var streakEvent: StudyProgress.StreakEvent
     public var newStage: TurtleStage?
     public var completedQuests: [DailyQuest.Kind]
     public var achievements: [String]
@@ -185,13 +185,13 @@ public struct StudyEngine: Sendable {
         var rng = SystemRandomNumberGenerator()
         let reward = Chest.roll(owned: progress.stickers, shields: progress.shields, using: &rng)
         apply(reward, to: &progress)
-        progress.chestOpenedDay = Progress.dayKey(now)
+        progress.chestOpenedDay = StudyProgress.dayKey(now)
         _ = Achievement.evaluate(progress: &progress, cards: store.loadCards())
         store.save(progress)
         return reward
     }
 
-    public func apply(_ reward: ChestReward, to progress: inout Progress) {
+    public func apply(_ reward: ChestReward, to progress: inout StudyProgress) {
         switch reward {
         case .xp(let n): progress.xp += n
         case .shield: progress.shields = min(3, progress.shields + 1)
@@ -219,7 +219,7 @@ public struct StudyEngine: Sendable {
 
     // MARK: Intern
 
-    private func streakBonus(for event: Progress.StreakEvent, streak: Int) -> Int {
+    private func streakBonus(for event: StudyProgress.StreakEvent, streak: Int) -> Int {
         switch event {
         case .extended, .shieldUsed: return 5 * min(streak, 10)
         case .restarted: return 5
@@ -227,7 +227,7 @@ public struct StudyEngine: Sendable {
         }
     }
 
-    private func heartsFor(_ event: Progress.StreakEvent) -> Int {
+    private func heartsFor(_ event: StudyProgress.StreakEvent) -> Int {
         // Erste Aktivität des Tages bringt Herzen – kommt man zurück, extra viele.
         switch event {
         case .alreadyToday: return 0
@@ -237,10 +237,10 @@ public struct StudyEngine: Sendable {
     }
 
     private func finish(
-        _ progress: inout Progress,
+        _ progress: inout StudyProgress,
         cards: [String: CardState],
         baseXP: Int,
-        streakEvent: Progress.StreakEvent,
+        streakEvent: StudyProgress.StreakEvent,
         before: TurtleStage,
         card: CardState?,
         saveCards: Bool,

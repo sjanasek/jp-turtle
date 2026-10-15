@@ -59,13 +59,13 @@ public final class SharedStore: @unchecked Sendable {
         self.isSharedWithWidget = isShared
     }
 
-    // MARK: Progress
+    // MARK: StudyProgress
 
-    public func loadProgress() -> Progress {
-        load(Progress.self, key: Key.progress) ?? Progress()
+    public func loadProgress() -> StudyProgress {
+        load(StudyProgress.self, key: Key.progress) ?? StudyProgress()
     }
 
-    public func save(_ progress: Progress) {
+    public func save(_ progress: StudyProgress) {
         save(progress, key: Key.progress)
     }
 

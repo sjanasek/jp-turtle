@@ -25,7 +25,7 @@ struct HomeView: View {
                         comebackBanner
                     }
                     learnButtons
-                    if model.chestAvailable || model.progress.chestOpenedDay == Progress.dayKey(Date()) {
+                    if model.chestAvailable || model.progress.chestOpenedDay == StudyProgress.dayKey(Date()) {
                         chestCard
                     }
                     questCard
@@ -277,7 +277,7 @@ struct HomeView: View {
 
 struct QuestRow: View {
     let quest: DailyQuest
-    let progress: Progress
+    let progress: StudyProgress
 
     var body: some View {
         let done = progress.isQuestDone(quest)

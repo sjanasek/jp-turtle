@@ -96,7 +96,7 @@ struct KanaRound: Identifiable {
     let pool: [Kana]
     let questions: [(kana: Kana, choices: [Kana], correctIndex: Int)]
 
-    init(script: Kana.Script, includeVoiced: Bool, progress: Progress, count: Int = 10) {
+    init(script: Kana.Script, includeVoiced: Bool, progress: StudyProgress, count: Int = 10) {
         self.script = script
         self.pool = KanaTable.all(script, includeVoiced: includeVoiced)
         var rng = SystemRandomNumberGenerator()

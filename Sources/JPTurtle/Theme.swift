@@ -97,7 +97,7 @@ struct KameView: View {
 }
 
 struct XPBar: View {
-    let progress: Progress
+    let progress: StudyProgress
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {

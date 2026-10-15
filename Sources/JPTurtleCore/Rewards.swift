@@ -82,7 +82,7 @@ public enum Chest {
     }
 }
 
-/// Achievements. Die Bedingung wird gegen Progress + Karten geprüft.
+/// Achievements. Die Bedingung wird gegen StudyProgress + Karten geprüft.
 public struct Achievement: Identifiable, Hashable, Sendable {
     public let id: String
     public let title: String
@@ -119,7 +119,7 @@ public struct Achievement: Identifiable, Hashable, Sendable {
 
     /// Prüft alle Bedingungen und gibt neu erreichte Achievements zurück.
     /// XP werden direkt gutgeschrieben.
-    public static func evaluate(progress: inout Progress, cards: [String: CardState], streakEvent: Progress.StreakEvent? = nil, viaWidget: Bool = false) -> [Achievement] {
+    public static func evaluate(progress: inout StudyProgress, cards: [String: CardState], streakEvent: StudyProgress.StreakEvent? = nil, viaWidget: Bool = false) -> [Achievement] {
         let learned = cards.values.filter { !$0.isNew }.count
         let mastered = cards.values.filter(\.isMastered).count
         let kanaAny = progress.kanaCorrectCounts.values.contains { $0 > 0 }

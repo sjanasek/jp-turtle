@@ -23,7 +23,7 @@ final class AppModel: ObservableObject {
     let store: SharedStore
     let engine: StudyEngine
 
-    @Published private(set) var progress: Progress
+    @Published private(set) var progress: StudyProgress
     @Published private(set) var cards: [String: CardState]
     @Published var selectedTab: Tab = .home
     /// Wird von HomeView konsumiert, um direkt eine Lernsitzung zu öffnen.
@@ -57,7 +57,7 @@ final class AppModel: ObservableObject {
     var masteredCount: Int { cards.values.filter(\.isMastered).count }
     var streakAlive: Bool { progress.streakIsAlive(now: Date()) }
     var chestAvailable: Bool { progress.chestAvailable(now: Date()) }
-    var studiedToday: Bool { progress.lastStudyDay == Progress.dayKey(Date()) }
+    var studiedToday: Bool { progress.lastStudyDay == StudyProgress.dayKey(Date()) }
 
     func card(for word: VocabWord) -> CardState? { cards[word.id] }
 
@@ -85,7 +85,7 @@ final class AppModel: ObservableObject {
         if !studiedToday {
             let cal = Calendar.current
             var gap = 0
-            if let last = progress.lastStudyDay, let d = Progress.date(fromDayKey: last) {
+            if let last = progress.lastStudyDay, let d = StudyProgress.date(fromDayKey: last) {
                 gap = cal.dateComponents([.day], from: cal.startOfDay(for: d), to: cal.startOfDay(for: now)).day ?? 0
             }
             if gap >= 3 {
