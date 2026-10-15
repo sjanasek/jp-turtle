@@ -8,7 +8,7 @@ import JPTurtleCore
 /// Größe gerendert, damit der InkScorer sie direkt vergleichen kann.
 @MainActor
 enum Rasterizer {
-    static let resolution = 128
+    nonisolated static let resolution = 128
 
     static func mask<V: View>(of view: V, size: Int = resolution, threshold: UInt8 = 96) -> BitMask? {
         let renderer = ImageRenderer(content: view.frame(width: CGFloat(size), height: CGFloat(size)))

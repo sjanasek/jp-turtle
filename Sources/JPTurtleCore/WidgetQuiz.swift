@@ -13,6 +13,26 @@ public struct WidgetQuizState: Codable, Equatable, Sendable {
     public var correctToday: Int
     public var day: String
 
+    public init(
+        wordID: String,
+        choiceIDs: [String],
+        correctIndex: Int,
+        answeredIndex: Int? = nil,
+        revealed: Bool = false,
+        createdAt: Date,
+        correctToday: Int = 0,
+        day: String
+    ) {
+        self.wordID = wordID
+        self.choiceIDs = choiceIDs
+        self.correctIndex = correctIndex
+        self.answeredIndex = answeredIndex
+        self.revealed = revealed
+        self.createdAt = createdAt
+        self.correctToday = correctToday
+        self.day = day
+    }
+
     public var word: VocabWord? { Vocabulary.word(id: wordID) }
     public var choices: [VocabWord] { choiceIDs.compactMap(Vocabulary.word(id:)) }
     public var isAnswered: Bool { answeredIndex != nil }

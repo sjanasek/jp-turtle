@@ -98,7 +98,8 @@ struct KanaRound: Identifiable {
 
     init(script: Kana.Script, includeVoiced: Bool, progress: StudyProgress, count: Int = 10) {
         self.script = script
-        self.pool = KanaTable.all(script, includeVoiced: includeVoiced)
+        let pool = KanaTable.all(script, includeVoiced: includeVoiced)
+        self.pool = pool
         var rng = SystemRandomNumberGenerator()
         // Schwach gelernte Zeichen bevorzugen: sortiert nach Trefferzahl, mit Zufall.
         let ranked = pool.shuffled(using: &rng).sorted {
