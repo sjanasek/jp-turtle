@@ -121,7 +121,7 @@ struct VocabQuizView: View {
                 if family == .systemLarge {
                     Spacer()
                     HStack {
-                        Image(systemName: "tortoise.fill").foregroundStyle(accent)
+                        KameFigure(stage: entry.progress.stage).frame(width: 24)
                         Text(entry.dueCount > 0 ? "\(entry.dueCount) Karten fällig" : "Alles wiederholt – Kame ist stolz.")
                         Spacer()
                         Text(entry.progress.stage.title)
@@ -323,9 +323,8 @@ struct StreakView: View {
         default:
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
-                    Image(systemName: "tortoise.fill")
-                        .font(.title)
-                        .foregroundStyle(Color(red: 0.18, green: 0.36, blue: 0.20))
+                    KameFigure(stage: entry.progress.stage)
+                        .frame(width: 46)
                     Spacer()
                     Label("\(entry.progress.streak)", systemImage: "flame.fill")
                         .font(.headline)

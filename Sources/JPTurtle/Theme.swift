@@ -56,14 +56,9 @@ struct KameView: View {
                     )
                     .shadow(radius: 2)
             } else {
-                Image(systemName: "tortoise.fill")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: size * scale, height: size * scale)
-                    .foregroundStyle(
-                        stage >= .elder ? Color.white : Theme.shellDark
-                    )
-                    .shadow(color: .black.opacity(0.2), radius: 2, y: 2)
+                KameFigure(stage: stage)
+                    .frame(width: size * scale * 1.35)
+                    .shadow(color: .black.opacity(0.15), radius: 2, y: 2)
             }
 
             if stage >= .wanderer {

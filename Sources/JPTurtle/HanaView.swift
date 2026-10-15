@@ -100,9 +100,8 @@ struct HanaView: View {
                     .offset(x: size * 0.2, y: -size * 0.1)
             }
             if friendship == .soulmate {
-                Image(systemName: "tortoise.fill")
-                    .font(.system(size: size * 0.11))
-                    .foregroundStyle(Theme.shell)
+                KameFigure(stage: .juvenile)
+                    .frame(width: size * 0.16)
                     .offset(x: -size * 0.2, y: -size * 0.08)
             }
 
