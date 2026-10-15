@@ -6,19 +6,23 @@
 #   scripts/deploy.sh iphone               aufs angeschlossene iPhone installieren
 #   scripts/deploy.sh xcode                Xcode-Projekt erzeugen und öffnen
 #
-# Option für sim/iphone/xcode:
-#   --no-widget   ohne Widget-Extension bauen (Ausweg für xtool-Issue #313)
+# Optionen:
+#   --no-widget       ohne Widget-Extension bauen (Ausweg für xtool-Issue #313)
+#   --team TEAMID     (xcode) Signing-Team gleich eintragen, z. B. --team AB12CD34EF
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 MODE="${1:-help}"
 shift || true
 NO_WIDGET=0
-for arg in "$@"; do
-  case "$arg" in
+TEAM=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
     --no-widget) NO_WIDGET=1 ;;
-    *) echo "Unbekannte Option: $arg" >&2; exit 2 ;;
+    --team) TEAM="${2:-}"; shift ;;
+    *) echo "Unbekannte Option: $1" >&2; exit 2 ;;
   esac
+  shift
 done
 
 say()  { printf '\n\033[1;32m==> %s\033[0m\n' "$*"; }
@@ -100,10 +104,22 @@ TXT
     without_widget_if_requested
     say "Erzeuge Xcode-Projekt"
     OUT="$(xtool dev generate-xcode-project | tee /dev/stderr | sed -n 's/^Wrote to //p' | tail -1)"
-    if [[ -n "$OUT" ]]; then
-      open "$OUT"
-      echo "In Xcode: oben das Team (deine Apple-ID) unter Signing & Capabilities wählen, Gerät auswählen, ▶ drücken."
+    [[ -n "$OUT" ]] || fail "xtool hat kein Projekt gemeldet."
+    PBX="$(find xtool/.xtool-tmp -name project.pbxproj -path '*JPTurtle.xcodeproj*' | head -1)"
+    if [[ -n "$TEAM" && -n "$PBX" ]]; then
+      say "Trage Signing-Team $TEAM für App und Widget ein"
+      sed -i '' -E "s/(PRODUCT_BUNDLE_IDENTIFIER = [^;]*;)/\1 DEVELOPMENT_TEAM = $TEAM; CODE_SIGN_STYLE = Automatic;/" "$PBX"
     fi
+    open "$OUT"
+    cat <<'TXT'
+
+In Xcode:
+  1. Oben links das Schema "JPTurtle" und dein iPhone als Ziel wählen.
+  2. Falls noch nötig: Projekt JPTurtle → Targets JPTurtle und JPTurtleWidget →
+     Signing & Capabilities → "Automatically manage signing" an, Team = dein Account.
+  3. ▶ (Cmd+R). Beim ersten Mal am iPhone: Entwicklermodus an, ggf. Entwickler vertrauen.
+Team-ID findest du in Xcode → Settings → Accounts → dein Team, oder auf developer.apple.com → Membership.
+TXT
     ;;
 
   *)
