@@ -83,7 +83,7 @@ struct SettingsView: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                     LabeledContent("Version", value: "0.1.0")
-                    Text("JP Turtle ist ein Open-Source-Lernspiel. Gebaut mit SwiftUI, WidgetKit und xtool – ganz ohne Xcode-Projekt.")
+                    Text("Kame - Japanisch lernen. Ein Lernspiel mit Hana und Kame.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }

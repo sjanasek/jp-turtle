@@ -4,7 +4,7 @@
 <dict>
 	<!-- Diese Keys werden von xtool über die generierte Info.plist gemergt. -->
 	<key>CFBundleDisplayName</key>
-	<string>JP Turtle</string>
+	<string>Kame</string>
 	<key>CFBundleShortVersionString</key>
 	<string>0.1.0</string>
 	<key>CFBundleVersion</key>

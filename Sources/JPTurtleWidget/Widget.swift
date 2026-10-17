@@ -132,7 +132,7 @@ struct VocabQuizView: View {
             }
             .widgetURL(DeepLink.review(wordID: word.id).url)
         } else {
-            Text("JP Turtle").font(.headline)
+            Text("Kame").font(.headline)
         }
     }
 
@@ -230,7 +230,7 @@ struct LockScreenWordView: View {
                 rectangular(word: word)
             }
         } else {
-            Text("JP Turtle")
+            Text("Kame")
         }
     }
 

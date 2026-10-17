@@ -34,7 +34,7 @@ struct HomeView: View {
                 .padding()
             }
             .background(Color(.systemGroupedBackground))
-            .navigationTitle("JP Turtle")
+            .navigationTitle("Kame")
             .fullScreenCover(item: $session) { s in
                 ReviewView(words: s.words)
             }
@@ -261,7 +261,7 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: 8) {
             Label("Vokabeln auf dem Sperrbildschirm", systemImage: "lock.iphone")
                 .font(.headline)
-            Text("Sperrbildschirm gedrückt halten → Anpassen → Widgets hinzufügen → „JP Turtle“. Das Wort-Widget zeigt alle paar Stunden eine neue Vokabel; auf dem Homescreen kannst du direkt im Widget antworten.")
+            Text("Sperrbildschirm gedrückt halten → Anpassen → Widgets hinzufügen → „Kame“. Das Wort-Widget zeigt alle paar Stunden eine neue Vokabel; auf dem Homescreen kannst du direkt im Widget antworten.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
             if !model.store.isSharedWithWidget {

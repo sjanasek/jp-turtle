@@ -1,4 +1,6 @@
-# JP Turtle 🐢 – spielerisch Japanisch lernen
+# Kame - Japanisch lernen 🐢
+
+Spielerisch Japanisch lernen. Auf dem Homescreen heißt die App kurz „Kame“, im App Store „Kame - Japanisch lernen“. (Interner Projektname: JP Turtle.)
 
 Eine iOS-App zum Japanischlernen, die ohne Xcode-Projekt auskommt: ein reines
 Swift Package, das mit [xtool](https://github.com/xtool-org/xtool) gebaut,
@@ -213,9 +215,9 @@ und `SharedStore.appGroupID` müssen zusammenpassen (`group.<bundleID>`).
 ## Widgets einrichten
 
 - **Sperrbildschirm**: Sperrbildschirm lange drücken → „Anpassen“ →
-  Sperrbildschirm → Widget-Bereich antippen → „JP Turtle“ → „Wort auf dem
+  Sperrbildschirm → Widget-Bereich antippen → „Kame“ → „Wort auf dem
   Sperrbildschirm“ (rechteckig) und/oder „Serie & Kame“ (rund).
-- **Homescreen**: Homescreen lange drücken → „+“ → „JP Turtle“ →
+- **Homescreen**: Homescreen lange drücken → „+“ → „Kame“ →
   „Vokabel-Quiz“ (mittel oder groß).
 
 ## Bekannte Einschränkungen (Stand 14. Oktober 2026)

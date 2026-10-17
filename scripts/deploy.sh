@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# JP Turtle testen und starten (macOS).
+# Kame - Japanisch lernen: testen und starten (macOS).
 #
 #   scripts/deploy.sh test                 Unit-Tests des Kerns (swift test)
 #   scripts/deploy.sh sim                  im iOS-Simulator starten (keine Apple-ID nötig)
@@ -104,7 +104,7 @@ case "$MODE" in
     open -a Simulator
     say "Baue und installiere im Simulator"
     xtool dev run --simulator
-    say "Starte JP Turtle"
+    say "Starte Kame"
     xcrun simctl launch booted "$(bundle_id)" || warn "Bitte die App im Simulator von Hand öffnen."
     ;;
 
